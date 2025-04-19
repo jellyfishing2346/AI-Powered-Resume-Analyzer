@@ -1,0 +1,19 @@
+We are looking for a skilled Software Engineer with:
+
+Required Skills:
+- Python programming
+- Algorithms and data structures
+- Software development lifecycle
+- Version control (Git)
+
+Preferred Qualifications:
+- 3+ years professional experience
+- Bachelor's degree in Computer Science
+- Cloud computing experience (AWS/Azure)
+- Database knowledge (SQL/NoSQL)
+
+Responsibilities:
+- Develop and maintain software applications
+- Collaborate with cross-functional teams
+- Write clean, maintainable code
+- Participate in code reviews

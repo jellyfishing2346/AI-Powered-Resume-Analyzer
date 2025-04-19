@@ -1,0 +1,20 @@
+Data Scientist Position Requirements:
+
+Essential Skills:
+- Python programming
+- Machine learning algorithms
+- Statistical analysis
+- Data visualization
+
+Experience Needed:
+- 2+ years in data science role
+- Experience with pandas, numpy, scikit-learn
+- SQL proficiency
+
+Education:
+- Advanced degree in STEM field preferred
+
+Nice to Have:
+- Big data technologies (Spark, Hadoop)
+- Deep learning experience
+- Cloud platform experience

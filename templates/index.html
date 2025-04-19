@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>AI-Powered Resume Analyzer</h1>
+        <form method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label for="resume">Upload Resume (PDF/DOCX):</label>
+                <input type="file" id="resume" name="resume" accept=".pdf,.docx" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Target Role:</label>
+                <select id="role" name="role" required>
+                    <option value="">Select a Role</option>
+                    <option value="software_engineer">Software Engineer</option>
+                    <option value="data_scientist">Data Scientist</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn">Analyze Resume</button>
+        </form>
+    </div>
+</body>
+</html>

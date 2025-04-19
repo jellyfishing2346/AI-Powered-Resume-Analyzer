@@ -1,0 +1,18 @@
+{
+    "software_engineer": {
+        "required_skills": ["python", "algorithms", "git"],
+        "experience_levels": {
+            "junior": {"min": 0, "max": 2},
+            "mid": {"min": 3, "max": 5},
+            "senior": {"min": 6, "max": 10}
+        }
+    },
+    "data_scientist": {
+        "required_skills": ["python", "machine learning", "statistics"],
+        "experience_levels": {
+            "junior": {"min": 0, "max": 2},
+            "mid": {"min": 3, "max": 5},
+            "senior": {"min": 6, "max": 10}
+        }
+    }
+}
