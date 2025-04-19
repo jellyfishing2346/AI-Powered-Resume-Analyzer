@@ -1,0 +1,6 @@
+[build]
+  command = "pip install -r requirements.txt && your_build_command"
+  publish = "build_directory"
+
+[build.environment]
+  PYTHON_VERSION = "3.10"

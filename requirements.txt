@@ -6,3 +6,6 @@ python-docx==0.8.11
 scikit-learn==1.4.0
 werkzeug==3.0.1
 python-json-logger==2.0.7
+setuptools>=65.0.0
+wheel>=0.38.0
+numpy>=1.19.0
