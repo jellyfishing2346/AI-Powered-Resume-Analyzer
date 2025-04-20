@@ -1,0 +1,31 @@
+{
+    "name": "ai-powered-resume-analyzer",
+    "version": "1.0.0",
+    "dependencies": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-scripts": "5.0.1",
+      "typescript": "^5.0.0",
+      "postcss": "^8.4.31",
+      "semver-regex": "^4.0.0",
+      "tar-fs": "^3.0.0",
+      "trim-newlines": "^5.0.0",
+      "ws": "^8.17.0",
+      "sharp": "^0.32.1"
+    },
+    "overrides": {
+      "css-select": "^5.1.0",
+      "svgo": "^3.0.2",
+      "puppeteer": "^22.11.1"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "browserslist": {
+      "production": [">0.2%", "not dead", "not op_mini all"],
+      "development": ["last 1 chrome version", "last 1 firefox version"]
+    }
+  }
