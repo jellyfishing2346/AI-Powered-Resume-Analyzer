@@ -1,15 +1,18 @@
-# requirements.txt
+# Use pre-built wheels for faster installation
 --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
 --extra-index-url https://pypi.anaconda.org/intel/simple
 
+# Core requirements
 flask==3.0.2
 flask-wtf==1.2.1
-spacy==3.8.0
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 PyPDF2==3.0.1
 python-docx==0.8.11
-scikit-learn==1.4.0
-werkzeug==3.0.1
 python-json-logger==2.0.7
-numpy==1.26.4
-blis==0.7.11
+
+# Pre-download spaCy model (avoids compilation)
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# Optimized scientific packages
+numpy==1.26.4; python_version >= '3.10'
+scikit-learn==1.4.0; python_version >= '3.10'
+blis==0.7.11; python_version >= '3.10'

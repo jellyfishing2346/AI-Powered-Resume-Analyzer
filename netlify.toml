@@ -1,12 +1,12 @@
 [build]
-  command = "npm install --production && npm run build"
-  publish = "build"
+  command = "chmod +x build.sh && timeout 15m ./build.sh"
+  publish = "public"
 
 [build.environment]
-  NODE_VERSION = "18.x"
-  NODE_ENV = "production"
+  PYTHON_VERSION = "3.10"
+  NODE_VERSION = "20"  # Required for Netlify's Python support
+  PIP_PROGRESS_BAR = "off"
+  PIP_DISABLE_PIP_VERSION_CHECK = "1"
 
-[[plugins]]
-  package = "netlify-plugin-cache"
-  [plugins.inputs]
-  paths = ["node_modules", ".cache", "build"]
+[context.production.environment]
+  FLASK_ENV = "production"

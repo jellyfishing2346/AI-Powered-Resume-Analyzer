@@ -1,14 +1,16 @@
 #!/bin/bash
-set -e
+set -ex
 
-# Speed up Python installs
+# Speed up pip (disable cache, parallel installs)
 export PIP_NO_CACHE_DIR=1
-export PYTHONUNBUFFERED=1
+export PIP_FIND_LINKS="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
+export PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/intel/simple"
 
-# Install dependencies with parallel processing
+# Install in two phases (core first, heavy deps second)
 pip install --upgrade pip
-pip install --use-pep517 --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple -r requirements.txt
+pip install --use-pep517 -r <(grep -v 'numpy\|scikit-learn\|blis' requirements.txt)
+pip install --use-pep517 -r <(grep 'numpy\|scikit-learn\|blis' requirements.txt)
 
-# Create minimal build output
+# Minimal build output
 mkdir -p public
-echo "<!DOCTYPE html><html><body>Flask app is running</body></html>" > public/index.html
+echo "<!DOCTYPE html><html><body>Flask backend ready</body></html>" > public/index.html
