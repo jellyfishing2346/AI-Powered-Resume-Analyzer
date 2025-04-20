@@ -1,7 +1,49 @@
+# netlify.toml
 [build]
-  command = "pip install -r requirements.txt && flask --app app.py run"
-  publish = "public"
+  # Install only production dependencies and skip dev tools
+  command = "npm install --production && npm run build"
   
+  # Publish directory (replace with your framework's output folder)
+  publish = "dist"
+
 [build.environment]
-  PYTHON_VERSION = "3.10"
-  FLASK_APP = "app.py"
+  # Set Node.js version (match your local environment)
+  NODE_VERSION = "18.x"
+  
+  # Optimize for production
+  NODE_ENV = "production"
+
+# Caching configuration to avoid re-downloading dependencies
+[[plugins]]
+  package = "netlify-plugin-cache"
+  [plugins.inputs]
+  # Cache dependencies and build outputs
+  paths = [
+    "node_modules",
+    ".cache",          # For frameworks like Gatsby/Next.js
+    "public",          # For static assets
+    "dist"             # For build outputs
+  ]
+
+# Performance optimization plugins
+[[plugins]]
+  package = "netlify-plugin-inline-critical-css"  # Optimizes CSS delivery
+
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"  # Automated performance audits
+
+# Image optimization (add if you have many images)
+[[plugins]]
+  package = "@netlify/plugin-image-optim"
+  [plugins.inputs]
+  compress_jpeg = true
+  compress_png = true
+  webp = true
+
+# Optional: Split build into stages
+[build.processing]
+  skip_processing = true  # Disables unnecessary post-processing
+
+# For frameworks with incremental builds (Gatsby/Next.js)
+[build]
+  command = "npm run build -- --incremental"  # Add if applicable
