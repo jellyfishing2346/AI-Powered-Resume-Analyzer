@@ -1,13 +1,11 @@
 # Railway Deployment Configuration
-# This file helps Railway understand your project structure
+# Simplified configuration for Railway deployment
 
 [build]
   builder = "dockerfile"
 
 [deploy]
   healthcheckPath = "/health"
-  restartPolicyType = "on-failure"
-  restartPolicyMaxRetries = 3
 
 [env]
   # These will be set in Railway dashboard
