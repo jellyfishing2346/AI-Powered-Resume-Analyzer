@@ -1,0 +1,52 @@
+John Doe
+Software Engineer
+
+Email: john.doe@email.com
+Phone: (555) 123-4567
+Location: San Francisco, CA
+
+EXPERIENCE
+
+Senior Software Engineer - TechCorp (2020-2024)
+• Developed scalable web applications using Python, Django, and React
+• Implemented machine learning models for recommendation systems
+• Led a team of 5 developers using Agile methodologies
+• Deployed applications on AWS using Docker and Kubernetes
+• Collaborated with data scientists to build ETL pipelines using Apache Spark
+
+Software Developer - StartupXYZ (2018-2020)
+• Built REST APIs using Node.js and Express
+• Designed and implemented PostgreSQL databases
+• Created responsive front-end interfaces using JavaScript, HTML, and CSS
+• Worked with Git version control and CI/CD pipelines using Jenkins
+
+EDUCATION
+
+Bachelor of Science in Computer Science
+University of California, Berkeley (2014-2018)
+
+SKILLS
+
+Programming Languages: Python, JavaScript, Java, C++, SQL
+Web Technologies: React, Django, Node.js, Express, HTML, CSS
+Databases: PostgreSQL, MongoDB, Redis
+Cloud & DevOps: AWS, Docker, Kubernetes, Jenkins
+Data & ML: Apache Spark, TensorFlow, scikit-learn, pandas, NumPy
+Tools: Git, Jira, Slack, VS Code
+
+CERTIFICATIONS
+
+• AWS Certified Solutions Architect (2022)
+• Certified Kubernetes Administrator (2021)
+
+PROJECTS
+
+E-commerce Recommendation Engine (2023)
+• Built machine learning recommendation system using collaborative filtering
+• Implemented using Python, TensorFlow, and deployed on AWS
+• Improved user engagement by 25%
+
+Real-time Analytics Dashboard (2022)
+• Created real-time data visualization dashboard using React and D3.js
+• Integrated with Apache Kafka for streaming data processing
+• Used by 500+ internal users daily

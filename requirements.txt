@@ -1,0 +1,18 @@
+fastapi>=0.68.0
+uvicorn>=0.15.0
+spacy>=3.0.0
+python-multipart>=0.0.5
+sentence-transformers>=2.2.0
+rapidfuzz>=3.0.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Production database support
+psycopg2-binary>=2.9.0  # PostgreSQL adapter for production
+
+# Export functionality
+reportlab>=3.6.0        # PDF generation
+openpyxl>=3.1.0         # Excel generation
+
+# Production server
+gunicorn>=20.1.0        # Production WSGI server

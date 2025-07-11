@@ -1,0 +1,16 @@
+# Railway Deployment Configuration
+# This file helps Railway understand your project structure
+
+[build]
+  builder = "dockerfile"
+
+[deploy]
+  healthcheckPath = "/health"
+  restartPolicyType = "on-failure"
+  restartPolicyMaxRetries = 3
+
+[env]
+  # These will be set in Railway dashboard
+  # DATABASE_URL (automatically provided by Railway PostgreSQL)
+  # PORT (automatically set to 8001)
+  # LOG_LEVEL = "INFO"

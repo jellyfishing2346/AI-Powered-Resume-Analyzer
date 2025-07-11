@@ -1,0 +1,194 @@
+# Programming Languages
+python
+java
+c++
+c#
+javascript
+typescript
+html
+css
+sql
+nosql
+mongodb
+postgresql
+mysql
+linux
+windows
+macos
+machine learning
+deep learning
+nlp
+computer vision
+data analysis
+data science
+statistics
+project management
+scrum
+agile
+excel
+powerpoint
+word
+git
+github
+gitlab
+bitbucket
+communication
+leadership
+problem solving
+teamwork
+collaboration
+presentation
+public speaking
+tensorflow
+pytorch
+react
+node.js
+vue.js
+angular
+flask
+django
+fastapi
+rest api
+graphql
+ci/cd
+unit testing
+integration testing
+selenium
+pytest
+jira
+confluence
+figma
+adobe xd
+photoshop
+illustrator
+
+# Additional Programming Languages
+ruby
+php
+swift
+kotlin
+go
+rust
+scala
+r
+matlab
+perl
+shell scripting
+bash
+powershell
+
+# Frameworks and Libraries
+spring boot
+express.js
+laravel
+ruby on rails
+.net core
+xamarin
+unity
+react native
+flutter
+ionic
+
+# Databases
+redis
+elasticsearch
+cassandra
+dynamodb
+sqlite
+oracle
+microsoft sql server
+mariadb
+
+# Cloud Platforms
+amazon web services
+google cloud platform
+microsoft azure
+heroku
+digitalocean
+linode
+cloudflare
+
+# DevOps and Tools
+jenkins
+github actions
+gitlab ci
+teamcity
+terraform
+ansible
+puppet
+chef
+vagrant
+docker compose
+helm
+prometheus
+grafana
+elk stack
+splunk
+
+# Data Science and Analytics
+pandas
+numpy
+scipy
+scikit-learn
+matplotlib
+seaborn
+plotly
+tableau
+power bi
+jupyter
+anaconda
+spark
+hadoop
+kafka
+airflow
+
+# Mobile Development
+android development
+ios development
+xcode
+android studio
+
+# Web Development
+sass
+less
+webpack
+gulp
+grunt
+bootstrap
+tailwind css
+material ui
+jquery
+d3.js
+
+# Testing
+jasmine
+mocha
+jest
+cypress
+postman
+swagger
+cucumber
+
+# Soft Skills
+analytical thinking
+creative thinking
+adaptability
+time management
+stress management
+conflict resolution
+negotiation
+mentoring
+coaching
+customer service
+sales
+marketing
+strategic planning
+risk management
+quality assurance
+business analysis
+technical writing
+documentation
+training
+research
+innovation
+entrepreneurship

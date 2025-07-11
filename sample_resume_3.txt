@@ -1,0 +1,56 @@
+Michael Chen
+Data Scientist & ML Engineer
+
+Email: michael.chen@email.com
+Phone: (555) 234-5678
+Location: San Francisco, CA
+
+EXPERIENCE
+
+Senior Data Scientist - AI Innovations (2020-2024)
+• Developed machine learning models for predictive analytics
+• Used Python, TensorFlow, and scikit-learn for model development
+• Built data pipelines using Apache Spark and Airflow
+• Collaborated with product teams to deploy ML models in production
+• Mentored junior data scientists and conducted technical presentations
+
+Data Analyst - DataCorp (2018-2020)
+• Analyzed large datasets using SQL, Python, and R
+• Created interactive dashboards using Tableau and Power BI
+• Performed statistical analysis and A/B testing
+• Worked with stakeholders to define KPIs and business metrics
+
+EDUCATION
+
+Master of Science in Data Science
+Stanford University (2016-2018)
+
+Bachelor of Mathematics
+UC Berkeley (2012-2016)
+
+SKILLS
+
+Programming: Python, R, SQL, Java, Scala
+ML/AI: TensorFlow, PyTorch, scikit-learn, Keras
+Data Tools: Pandas, NumPy, Matplotlib, Seaborn
+Big Data: Apache Spark, Hadoop, Kafka
+Databases: PostgreSQL, MongoDB, Redis
+Cloud: AWS, GCP, Azure
+Visualization: Tableau, Power BI, D3.js
+
+CERTIFICATIONS
+
+• AWS Certified Machine Learning Specialty (2023)
+• Google Cloud Professional Data Engineer (2022)
+
+PROJECTS
+
+Recommendation System (2023)
+• Built collaborative filtering recommendation engine
+• Processed 10M+ user interactions using Spark
+• Achieved 25% improvement in user engagement
+
+Fraud Detection Model (2022)
+• Developed real-time fraud detection using deep learning
+• Implemented using TensorFlow and deployed on AWS
+• Reduced false positives by 40%

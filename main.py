@@ -1,0 +1,459 @@
+
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+import spacy
+from sentence_transformers import SentenceTransformer, util as st_util
+from rapidfuzz import process, fuzz
+import os
+from typing import List, Dict, Set, Optional
+import tempfile
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
+    logger.warning("pdfplumber not installed. PDF support disabled.")
+
+try:
+    import docx
+except ImportError:
+    docx = None
+    logger.warning("python-docx not installed. DOCX support disabled.")
+
+try:
+    from pyresparser import ResumeParser
+except ImportError:
+    ResumeParser = None
+    logger.warning("pyresparser not installed. Advanced parsing disabled.")
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="AI-Powered Resume Analyzer",
+    description="A high-performance API for automated resume analysis and candidate ranking using advanced NLP techniques.",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize models
+try:
+    nlp = spacy.load("en_core_web_lg")
+    logger.info("Loaded spaCy model: en_core_web_lg")
+except OSError:
+    try:
+        nlp = spacy.load("en_core_web_sm")
+        logger.info("Loaded spaCy model: en_core_web_sm")
+    except OSError:
+        logger.error("No spaCy model found. Please install with: python -m spacy download en_core_web_sm")
+        raise
+
+# Use a transformer model for better semantic similarity
+st_model = SentenceTransformer('all-MiniLM-L6-v2')
+logger.info("Loaded SentenceTransformer model: all-MiniLM-L6-v2")
+
+# Load skills from skills.txt
+def load_skills(filepath: str = "skills.txt") -> set:
+    try:
+        with open(filepath, "r") as f:
+            return set(line.strip().lower() for line in f if line.strip())
+    except Exception:
+        return set()
+
+COMMON_SKILLS = load_skills()
+
+def extract_text_from_pdf(file_path: str) -> str:
+    """Extract text from PDF file using pdfplumber."""
+    if not pdfplumber:
+        raise HTTPException(status_code=400, detail="PDF support not available. Please install pdfplumber.")
+    try:
+        with pdfplumber.open(file_path) as pdf:
+            return "\n".join(page.extract_text() or '' for page in pdf.pages)
+    except Exception as e:
+        logger.error(f"Error extracting text from PDF: {e}")
+        raise HTTPException(status_code=400, detail="Failed to extract text from PDF file.")
+
+def extract_text_from_docx(file_path: str) -> str:
+    """Extract text from DOCX file using python-docx."""
+    if not docx:
+        raise HTTPException(status_code=400, detail="DOCX support not available. Please install python-docx.")
+    try:
+        doc = docx.Document(file_path)
+        return "\n".join([para.text for para in doc.paragraphs])
+    except Exception as e:
+        logger.error(f"Error extracting text from DOCX: {e}")
+        raise HTTPException(status_code=400, detail="Failed to extract text from DOCX file.")
+
+def extract_text(file: UploadFile) -> str:
+    """Extract text from uploaded file based on file extension."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No filename provided.")
+    
+    suffix = os.path.splitext(file.filename)[1].lower()
+    
+    # Reset file pointer to beginning
+    file.file.seek(0)
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        content = file.file.read()
+        if not content:
+            raise HTTPException(status_code=400, detail="File is empty.")
+        tmp.write(content)
+        tmp_path = tmp.name
+    
+    try:
+        if suffix == ".pdf":
+            return extract_text_from_pdf(tmp_path)
+        elif suffix in [".docx", ".doc"]:
+            return extract_text_from_docx(tmp_path)
+        elif suffix == ".txt":
+            with open(tmp_path, "r", encoding="utf-8", errors="ignore") as f:
+                return f.read()
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Unsupported file format: {suffix}. Supported formats: .pdf, .docx, .doc, .txt"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing file {file.filename}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process the uploaded file.")
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+# Advanced resume parsing with pyresparser
+def parse_resume_with_pyresparser(file: UploadFile) -> Optional[Dict]:
+    """Parse resume using pyresparser for advanced extraction."""
+    if ResumeParser is None:
+        logger.warning("pyresparser not available for advanced parsing.")
+        return None
+    
+    if not file.filename:
+        return None
+        
+    suffix = os.path.splitext(file.filename)[1].lower()
+    file.file.seek(0)  # Reset file pointer
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        content = file.file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+    
+    try:
+        data = ResumeParser(tmp_path).get_extracted_data()
+        return data
+    except Exception as e:
+        logger.warning(f"pyresparser failed for {file.filename}: {e}")
+        return None
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+def extract_entities(text: str) -> List[Dict[str, str]]:
+    """Extract named entities from text using spaCy NLP."""
+    try:
+        doc = nlp(text)
+        entities = [{"label": ent.label_, "text": ent.text, "description": spacy.explain(ent.label_)} 
+                   for ent in doc.ents]
+        return entities
+    except Exception as e:
+        logger.error(f"Error extracting entities: {e}")
+        return []
+
+def extract_skills(text: str, skill_set: Set[str] = COMMON_SKILLS) -> Set[str]:
+    """Extract skills from text using fuzzy matching and NER."""
+    if not text.strip():
+        return set()
+        
+    text_lower = text.lower()
+    found = set()
+    
+    try:
+        # Fuzzy match skills using rapidfuzz
+        for skill in skill_set:
+            # Accept matches with a fuzz ratio >= 85
+            match_result = process.extractOne(skill, [text_lower], scorer=fuzz.partial_ratio)
+            if match_result and match_result[1] >= 85:
+                found.add(skill)
+        
+        # Use spaCy NER for additional skills (if any custom NER is available)
+        doc = nlp(text)
+        for ent in doc.ents:
+            if ent.label_ in {"SKILL", "ORG", "PRODUCT"} and ent.text.lower() in skill_set:
+                found.add(ent.text.lower())
+                
+    except Exception as e:
+        logger.error(f"Error extracting skills: {e}")
+    
+    return found
+def extract_summary(text: str) -> str:
+    # Simple summary: first 2-3 sentences
+    import re
+    sentences = re.split(r'(?<=[.!?]) +', text.strip())
+    return ' '.join(sentences[:3])
+
+def extract_education(text: str) -> list:
+    # Look for degree keywords
+    degrees = ["bachelor", "master", "phd", "associate", "b.sc", "m.sc", "b.a", "m.a", "mba", "b.eng", "m.eng"]
+    found = []
+    for line in text.splitlines():
+        for deg in degrees:
+            if deg in line.lower():
+                found.append(line.strip())
+    return found
+
+def extract_experience(text: str) -> list:
+    # Look for lines with years and job titles
+    import re
+    exp = []
+    for line in text.splitlines():
+        if re.search(r'(\b20\d{2}\b|\b19\d{2}\b)', line):
+            exp.append(line.strip())
+    return exp
+
+def analyze_resume_vs_job(resume_text: str, job_text: str) -> Dict:
+    """Analyze resume against job description and return matching metrics."""
+    try:
+        resume_skills = extract_skills(resume_text)
+        job_skills = extract_skills(job_text)
+        
+        matched_skills = resume_skills & job_skills
+        missing_skills = job_skills - resume_skills
+        extra_skills = resume_skills - job_skills
+        
+        # Calculate skill match percentage
+        skill_match_percentage = (len(matched_skills) / len(job_skills) * 100) if job_skills else 0
+        
+        # Use sentence-transformers for semantic similarity
+        resume_emb = st_model.encode(resume_text, convert_to_tensor=True)
+        job_emb = st_model.encode(job_text, convert_to_tensor=True)
+        similarity = float(st_util.pytorch_cos_sim(resume_emb, job_emb).item())
+        
+        # Calculate overall score (weighted combination of similarity and skill match)
+        overall_score = (similarity * 0.7) + (skill_match_percentage / 100 * 0.3)
+        
+        return {
+            "matched_skills": list(matched_skills),
+            "missing_skills": list(missing_skills),
+            "extra_skills": list(extra_skills),
+            "skill_match_percentage": round(skill_match_percentage, 2),
+            "semantic_similarity": round(similarity, 4),
+            "overall_score": round(overall_score, 4)
+        }
+    except Exception as e:
+        logger.error(f"Error analyzing resume vs job: {e}")
+        return {
+            "matched_skills": [],
+            "missing_skills": [],
+            "extra_skills": [],
+            "skill_match_percentage": 0,
+            "semantic_similarity": 0,
+            "overall_score": 0
+        }
+
+@app.get("/", tags=["Root"])
+def read_root():
+    """Root endpoint with API information."""
+    return {
+        "message": "AI-Powered Resume Analyzer API",
+        "version": "1.0.0",
+        "description": "A high-performance API for automated resume analysis and candidate ranking using advanced NLP techniques.",
+        "endpoints": {
+            "docs": "/docs",
+            "analyze_resume": "/analyze_resume/",
+            "match_resume": "/match_resume/",
+            "rank_candidates": "/rank_candidates/"
+        }
+    }
+
+@app.get("/health", tags=["Health"])
+def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy", "message": "API is running normally"}
+
+@app.post("/analyze_resume/", tags=["Resume Analysis"])
+async def analyze_resume(file: UploadFile = File(..., description="Resume file (PDF, DOCX, or TXT)")):
+    """
+    Analyze a single resume and extract key information.
+    
+    - **file**: Upload a resume file (PDF, DOCX, or TXT format)
+    
+    Returns extracted entities, skills, summary, education, experience, and more.
+    """
+    try:
+        # Try pyresparser first for richer extraction
+        pyresparser_data = parse_resume_with_pyresparser(file)
+        
+        # Fallback to text extraction and custom logic
+        file.file.seek(0)  # Reset file pointer
+        text = extract_text(file)
+        
+        if not text.strip():
+            raise HTTPException(status_code=400, detail="No text content found in the uploaded file.")
+        
+        entities = extract_entities(text)
+        skills = list(extract_skills(text))
+        summary = extract_summary(text)
+        education = extract_education(text)
+        experience = extract_experience(text)
+        
+        result = {
+            "filename": file.filename,
+            "entities": entities,
+            "skills": skills,
+            "skills_count": len(skills),
+            "summary": summary,
+            "education": education,
+            "experience": experience,
+            "text_preview": text[:500] + "..." if len(text) > 500 else text,
+            "text_length": len(text)
+        }
+        
+        if pyresparser_data:
+            result["advanced_parsing"] = pyresparser_data
+            
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing resume: {e}")
+        raise HTTPException(status_code=500, detail="Failed to analyze the resume.")
+
+@app.post("/match_resume/", tags=["Resume Analysis"])
+async def match_resume(
+    resume: UploadFile = File(..., description="Resume file (PDF, DOCX, or TXT)"),
+    job_description: str = Form(..., description="Job description text to match against")
+):
+    """
+    Match a resume against a job description and get compatibility analysis.
+    
+    - **resume**: Upload a resume file (PDF, DOCX, or TXT format)
+    - **job_description**: Job description text to analyze compatibility
+    
+    Returns matching analysis including skills overlap, similarity score, and detailed breakdown.
+    """
+    try:
+        if not job_description.strip():
+            raise HTTPException(status_code=400, detail="Job description cannot be empty.")
+            
+        resume_text = extract_text(resume)
+        
+        if not resume_text.strip():
+            raise HTTPException(status_code=400, detail="No text content found in the uploaded resume.")
+        
+        analysis = analyze_resume_vs_job(resume_text, job_description)
+        summary = extract_summary(resume_text)
+        education = extract_education(resume_text)
+        experience = extract_experience(resume_text)
+        
+        return {
+            "filename": resume.filename,
+            "analysis": analysis,
+            "candidate_info": {
+                "summary": summary,
+                "education": education,
+                "experience": experience
+            },
+            "resume_preview": resume_text[:500] + "..." if len(resume_text) > 500 else resume_text
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error matching resume: {e}")
+        raise HTTPException(status_code=500, detail="Failed to match resume against job description.")
+
+@app.post("/rank_candidates/", tags=["Candidate Ranking"])
+async def rank_candidates(
+    resumes: List[UploadFile] = File(..., description="Multiple resume files to rank"),
+    job_description: str = Form(..., description="Job description to rank candidates against")
+):
+    """
+    Rank multiple candidates based on their resumes and job description compatibility.
+    
+    - **resumes**: Upload multiple resume files (PDF, DOCX, or TXT format)
+    - **job_description**: Job description text to rank candidates against
+    
+    Returns a ranked list of candidates with detailed analysis for each.
+    """
+    try:
+        if not job_description.strip():
+            raise HTTPException(status_code=400, detail="Job description cannot be empty.")
+            
+        if not resumes:
+            raise HTTPException(status_code=400, detail="At least one resume file must be provided.")
+        
+        job_text = job_description
+        job_skills = extract_skills(job_text)
+        results = []
+        job_emb = st_model.encode(job_text, convert_to_tensor=True)
+        
+        for file in resumes:
+            try:
+                text = extract_text(file)
+                
+                if not text.strip():
+                    logger.warning(f"Empty content in file: {file.filename}")
+                    continue
+                
+                analysis = analyze_resume_vs_job(text, job_text)
+                summary = extract_summary(text)
+                education = extract_education(text)
+                experience = extract_experience(text)
+                
+                results.append({
+                    "filename": file.filename,
+                    "overall_score": analysis["overall_score"],
+                    "semantic_similarity": analysis["semantic_similarity"],
+                    "skill_match_percentage": analysis["skill_match_percentage"],
+                    "matched_skills": analysis["matched_skills"],
+                    "missing_skills": analysis["missing_skills"],
+                    "extra_skills": analysis["extra_skills"],
+                    "candidate_info": {
+                        "summary": summary,
+                        "education": education,
+                        "experience": experience
+                    },
+                    "preview": text[:200] + "..." if len(text) > 200 else text
+                })
+                
+            except Exception as e:
+                logger.error(f"Error processing file {file.filename}: {e}")
+                # Continue with other files
+                continue
+        
+        if not results:
+            raise HTTPException(status_code=400, detail="No valid resume content found in any of the uploaded files.")
+        
+        # Rank by overall score (combination of semantic similarity and skill match)
+        ranked = sorted(results, key=lambda x: x["overall_score"], reverse=True)
+        
+        return {
+            "job_description_preview": job_text[:200] + "..." if len(job_text) > 200 else job_text,
+            "total_candidates": len(ranked),
+            "job_required_skills": list(job_skills),
+            "ranked_candidates": ranked
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error ranking candidates: {e}")
+        raise HTTPException(status_code=500, detail="Failed to rank candidates.")
