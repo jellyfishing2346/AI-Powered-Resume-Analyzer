@@ -1,4 +1,4 @@
-# Ultra-minimal Dockerfile for Render free tier
+# Ultra-minimal Dockerfile for Render free tier - v2
 FROM python:3.11-slim
 
 WORKDIR /app
