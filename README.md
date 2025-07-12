@@ -42,7 +42,20 @@ A production-ready AI-powered resume analysis and candidate ranking system with 
 - **Error Handling**: Robust error handling and logging
 - **CORS Configuration**: Secure cross-origin resource sharing
 
-## 📊 Live Demo
+## 🌐 Live Deployment
+
+### 🎉 **LIVE APPLICATION**
+- **🌟 Frontend (Web App)**: https://bucolic-syrniki-823087.netlify.app/
+- **⚡ Backend (API)**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/
+- **📚 API Documentation**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/docs
+
+### � **Try It Now!**
+1. **Visit the Web App**: Click the frontend link above
+2. **Upload a Resume**: Use the file upload interface
+3. **Enter Job Description**: Paste or type the job requirements
+4. **Get AI Analysis**: View detailed matching results and scoring
+
+## 📊 Local Development
 
 ### API Documentation
 - **Interactive Docs**: [http://localhost:8001/docs](http://localhost:8001/docs)

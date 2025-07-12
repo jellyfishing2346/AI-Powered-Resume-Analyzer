@@ -2,11 +2,34 @@
 
 ## ✅ SUCCESS - AI-Powered Resume Analyzer is LIVE!
 
-**🌐 Live Service URL**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com
+**� Frontend (Web App)**: https://bucolic-syrniki-823087.netlify.app/  
+**⚡ Backend (API)**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/  
+**📚 API Documentation**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/docs
 
-**📊 Deployment Platform**: Render (Free Tier)  
+**📊 Deployment Platform**: 
+- **Frontend**: Netlify (Free Tier)
+- **Backend**: Render (Free Tier)  
 **🐳 Container**: Docker (python:3.11-slim)  
-**🚀 Status**: DEPLOYED & RUNNING  
+**🚀 Status**: FULLY DEPLOYED & OPERATIONAL
+
+## 🎯 **Complete Application Stack**
+
+### **🌟 User-Facing Web Application**
+- **URL**: https://bucolic-syrniki-823087.netlify.app/
+- **Features**: Resume upload, job matching, AI analysis results
+- **Technology**: React + Material-UI
+- **Hosting**: Netlify CDN (Global distribution)
+
+### **⚡ Backend API Service**  
+- **URL**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/
+- **Features**: Resume processing, AI analysis, job matching algorithms
+- **Technology**: FastAPI + Python
+- **Hosting**: Render containerized deployment
+
+### **📚 Interactive Documentation**
+- **URL**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/docs
+- **Features**: Live API testing, endpoint documentation, file upload testing
+- **Technology**: Swagger UI (auto-generated)
 
 ---
 
