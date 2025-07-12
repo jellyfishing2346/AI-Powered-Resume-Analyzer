@@ -6,7 +6,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  REACT_APP_API_URL = "https://your-api-backend.railway.app"
+  REACT_APP_API_URL = "https://ai-powered-resume-analyzer-1-i3r9.onrender.com"
 
 # Redirect all routes to index.html for React Router
 [[redirects]]

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Typography, TextField, Paper, Grid, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API_BASE = process.env.REACT_APP_API_URL || 'https://ai-powered-resume-analyzer-1-i3r9.onrender.com';
 
 function ResumeAnalyzerForm() {
   const [resume, setResume] = useState(null);
@@ -28,7 +28,7 @@ function ResumeAnalyzerForm() {
       const formData = new FormData();
       formData.append('file', resume);
       formData.append('job_description', jobDescription);
-      const response = await axios.post(`${API_BASE}/analyze`, formData, {
+      const response = await axios.post(`${API_BASE}/match_resume/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setResult(response.data);
