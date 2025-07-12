@@ -24,4 +24,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8001}/ || exit 1
 
 # Start command
-CMD gunicorn main:app --host 0.0.0.0 --port ${PORT:-8001} --workers 1 --timeout 120
+CMD gunicorn main:app --bind 0.0.0.0:${PORT:-8001} --workers 1 --timeout 120
