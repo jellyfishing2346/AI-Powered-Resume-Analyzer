@@ -197,7 +197,7 @@ def calculate_match_score(text1: str, text2: str) -> float:
 async def root():
     """Root endpoint providing API information."""
     return {
-        "message": "AI-Powered Resume Analyzer API (Enhanced Version)",
+        "message": "AI-Powered Resume Analyzer API (Test Version)",
         "version": "1.0.0",
         "status": "operational",
         "features": {
@@ -371,7 +371,82 @@ async def rank_candidates(
         logger.error(f"Error ranking candidates: {e}")
         raise HTTPException(status_code=500, detail="Internal server error during candidate ranking.")
 
-@app.post("/test")
+@app.get("/history/analyses")
+async def get_recent_analyses(limit: int = 10):
+    """Get recent analysis history."""
+    try:
+        analyses = db_manager.get_recent_analyses(limit)
+        return {
+            "success": True,
+            "analyses": analyses,
+            "count": len(analyses)
+        }
+    except Exception as e:
+        logger.error(f"Error getting analyses: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving analysis history.")
+
+@app.get("/history/rankings")
+async def get_recent_rankings(limit: int = 10):
+    """Get recent ranking history."""
+    try:
+        rankings = db_manager.get_recent_rankings(limit)
+        return {
+            "success": True,
+            "rankings": rankings,
+            "count": len(rankings)
+        }
+    except Exception as e:
+        logger.error(f"Error getting rankings: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving ranking history.")
+
+@app.get("/stats")
+async def get_statistics():
+    """Get database statistics and insights."""
+    try:
+        stats = db_manager.get_stats()
+        return {
+            "success": True,
+            "statistics": stats
+        }
+    except Exception as e:
+        logger.error(f"Error getting stats: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving statistics.")
+
+@app.get("/analysis/{analysis_id}")
+async def get_analysis_details(analysis_id: int):
+    """Get detailed analysis by ID."""
+    try:
+        analysis = db_manager.get_analysis_by_id(analysis_id)
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found.")
+        return {
+            "success": True,
+            "analysis": analysis
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting analysis details: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving analysis details.")
+
+@app.get("/ranking/{ranking_id}")
+async def get_ranking_details(ranking_id: int):
+    """Get detailed ranking by ID."""
+    try:
+        ranking = db_manager.get_ranking_by_id(ranking_id)
+        if not ranking:
+            raise HTTPException(status_code=404, detail="Ranking not found.")
+        return {
+            "success": True,
+            "ranking": ranking
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting ranking details: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving ranking details.")
+
+@app.get("/test")
 async def test_components():
     """Test endpoint to verify all components are working."""
     try:

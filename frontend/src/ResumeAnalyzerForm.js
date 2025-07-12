@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Typography, TextField, Paper, Grid, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
 function ResumeAnalyzerForm() {
   const [resume, setResume] = useState(null);

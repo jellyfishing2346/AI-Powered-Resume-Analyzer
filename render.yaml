@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ai-powered-resume-analyzer
+    env: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8001
+      - key: LOG_LEVEL
+        value: INFO
+    # Render will provide: https://ai-powered-resume-analyzer.onrender.com
+
+# Optional: Add database if needed later
+# databases:
+#   - name: resume-analyzer-db
+#     plan: free
