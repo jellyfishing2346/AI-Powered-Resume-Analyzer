@@ -43,8 +43,8 @@ def check_health(base_url):
         return False
 
 if __name__ == "__main__":
-    # Replace with your actual Render URL when it's deployed
-    render_url = "https://ai-powered-resume-analyzer.onrender.com"
+    # Official Render URL (updated)
+    render_url = "https://ai-powered-resume-analyzer-1-i3r9.onrender.com"
     
     print("🚀 Checking deployment status...")
     print("=" * 50)
