@@ -23,5 +23,5 @@ RUN pip install --no-cache-dir \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8001}/ || exit 1
 
-# Start command
-CMD gunicorn main:app --bind 0.0.0.0:${PORT:-8001} --workers 1 --timeout 120
+# Start command with ASGI worker for FastAPI
+CMD gunicorn main:app --bind 0.0.0.0:${PORT:-8001} --workers 1 --worker-class uvicorn.workers.UvicornWorker --timeout 120
