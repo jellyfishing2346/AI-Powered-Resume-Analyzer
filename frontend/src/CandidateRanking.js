@@ -7,6 +7,8 @@ import {
 import { ExpandMore, TrendingUp, Person, Assessment } from '@mui/icons-material';
 import axios from 'axios';
 
+// ...existing imports...
+
 const API_BASE = process.env.REACT_APP_API_URL || 'https://ai-powered-resume-analyzer-1-i3r9.onrender.com';
 
 function CandidateRanking() {
@@ -21,29 +23,57 @@ function CandidateRanking() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setResults(null);
-  if (!resumes.length || !jobDescription) {
-    setError('Please upload at least one resume and enter a job description.');
-    return;
+    e.preventDefault();
+    setError('');
+    setResults(null);
+    if (!resumes.length || !jobDescription) {
+      setError('Please upload at least one resume and enter a job description.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      resumes.forEach((file) => formData.append('resumes', file));
+      formData.append('job_description', jobDescription);
+      console.log('Request URL:', `${API_BASE}/rank_candidates/`);
+      for (let pair of formData.entries()) {
+        console.log(pair[0]+ ':', pair[1]);
   }
-  setLoading(true);
-  try {
-    const formData = new FormData();
-    resumes.forEach((file) => formData.append('resumes', file)); // backend expects 'resumes'
-    formData.append('job_description', jobDescription);
-    const response = await axios.post(`${API_BASE}/rank_candidates/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    setResults(response.data.ranked_candidates || []);
-  } catch (err) {
-    setError(err.response?.data?.detail || 'Failed to rank candidates. Please try again.');
-    console.error('Ranking error:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await axios.post(`${API_BASE}/rank_candidates/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      // Defensive: check if ranked_candidates exists and is an array
+      if (response.data && Array.isArray(response.data.ranked_candidates)) {
+        // Map backend fields to frontend expectations
+        const mappedResults = response.data.ranked_candidates.map((c, idx) => ({
+          ...c,
+          match_score: c.skill_match_percentage ?? 0,
+          skill_count: c.matched_skills?.length ?? 0,
+          word_count: c.preview ? c.preview.split(/\s+/).length : 0,
+          entity_count: c.matched_skills?.length ?? 0,
+          resume_preview: c.preview ?? '',
+          rank: idx + 1,
+          skills: c.matched_skills ?? [],
+        }));
+        setResults(mappedResults);
+      } else {
+        setError('Unexpected response format from server.');
+        setResults([]);
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        'Failed to rank candidates. Please try again.'
+      );
+      setResults([]);
+      console.error('Ranking error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ...rest of your component unchanged...
 
   return (
     <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, mb: 5, borderRadius: 3, boxShadow: 4, background: 'rgba(255,255,255,0.98)' }}>
