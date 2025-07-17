@@ -17,30 +17,34 @@ function ResumeAnalyzerForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setResult(null);
-    if (!resume || !jobDescription) {
-      setError('Please upload a resume and enter a job description.');
-      return;
-    }
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', resume);
+  e.preventDefault();
+  setError('');
+  setResult(null);
+  if (!resume || !jobDescription) {
+    setError('Please upload a resume and enter a job description.');
+    return;
+  }
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    if (endpoint === 'analyze_resume') {
+      formData.append('file', resume); // backend expects 'file'
+    } else if (endpoint === 'match_resume') {
+      formData.append('resume', resume); // backend expects 'resume'
       formData.append('job_description', jobDescription);
-      const url = `${API_BASE}/${endpoint}/`;
-      const response = await axios.post(url, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setResult(response.data);
-    } catch (err) {
-      setError('Failed to analyze resume. Please try again.');
-      console.error('API Error:', err);
-    } finally {
-      setLoading(false);
     }
-  };
+    const url = `${API_BASE}/${endpoint}/`;
+    const response = await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    setResult(response.data);
+  } catch (err) {
+    setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
+    console.error('API Error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, mb: 5, borderRadius: 3, boxShadow: 4, background: 'rgba(255,255,255,0.98)' }}>

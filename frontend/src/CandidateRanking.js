@@ -7,7 +7,7 @@ import {
 import { ExpandMore, TrendingUp, Person, Assessment } from '@mui/icons-material';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API_BASE = process.env.REACT_APP_API_URL || 'https://ai-powered-resume-analyzer-1-i3r9.onrender.com';
 
 function CandidateRanking() {
   const [resumes, setResumes] = useState([]);
@@ -21,29 +21,29 @@ function CandidateRanking() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setResults(null);
-    if (!resumes.length || !jobDescription) {
-      setError('Please upload at least one resume and enter a job description.');
-      return;
-    }
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      resumes.forEach((file) => formData.append('files', file));
-      formData.append('job_description', jobDescription);
-      const response = await axios.post(`${API_BASE}/rank`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setResults(response.data.ranked_candidates);
-    } catch (err) {
-      setError('Failed to rank candidates. Please try again.');
-      console.error('Ranking error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setError('');
+  setResults(null);
+  if (!resumes.length || !jobDescription) {
+    setError('Please upload at least one resume and enter a job description.');
+    return;
+  }
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    resumes.forEach((file) => formData.append('resumes', file)); // backend expects 'resumes'
+    formData.append('job_description', jobDescription);
+    const response = await axios.post(`${API_BASE}/rank_candidates/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    setResults(response.data.ranked_candidates || []);
+  } catch (err) {
+    setError(err.response?.data?.detail || 'Failed to rank candidates. Please try again.');
+    console.error('Ranking error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, mb: 5, borderRadius: 3, boxShadow: 4, background: 'rgba(255,255,255,0.98)' }}>
