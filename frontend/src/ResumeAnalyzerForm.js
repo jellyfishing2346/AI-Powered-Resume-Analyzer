@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, TextField, Paper, Grid, CircularProgress, Alert } from '@mui/material';
+import { Box, Button, Typography, TextField, Paper, Grid, CircularProgress, Alert, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import axios from 'axios';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'https://ai-powered-resume-analyzer-1-i3r9.onrender.com';
@@ -10,6 +10,7 @@ function ResumeAnalyzerForm() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [endpoint, setEndpoint] = useState('analyze_resume'); // default endpoint
 
   const handleFileChange = (e) => {
     setResume(e.target.files[0]);
@@ -28,7 +29,8 @@ function ResumeAnalyzerForm() {
       const formData = new FormData();
       formData.append('file', resume);
       formData.append('job_description', jobDescription);
-      const response = await axios.post(`${API_BASE}/match_resume/`, formData, {
+      const url = `${API_BASE}/${endpoint}/`;
+      const response = await axios.post(url, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setResult(response.data);
@@ -67,6 +69,19 @@ function ResumeAnalyzerForm() {
               required
               sx={{ background: '#f7fafd', borderRadius: 2 }}
             />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">Analysis Type</FormLabel>
+              <RadioGroup
+                row
+                value={endpoint}
+                onChange={(e) => setEndpoint(e.target.value)}
+              >
+                <FormControlLabel value="analyze_resume" control={<Radio />} label="Analyze Resume" />
+                <FormControlLabel value="match_resume" control={<Radio />} label="Match Resume to Job" />
+              </RadioGroup>
+            </FormControl>
           </Grid>
           <Grid item xs={12}>
             <Button
