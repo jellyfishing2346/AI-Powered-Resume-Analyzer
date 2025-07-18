@@ -16,3 +16,8 @@ openpyxl>=3.1.0         # Excel generation
 
 # Production server
 gunicorn>=20.1.0        # Production WSGI server
+
+# Added for PDF/DOCX/Advanced Parsing support (from previous warnings)
+pdfplumber>=0.11.0
+python-docx>=1.1.0
+pyresparser>=0.1.0

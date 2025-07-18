@@ -2,7 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install curl for healthcheck and any other necessary apt packages
+# Also install git, which might be needed by some pip packages (e.g., pyresparser's dependencies)
+# and build-essential for compiling some Python packages with C extensions
+RUN apt-get update && \
+    apt-get install -y curl git build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy all necessary files
 COPY main.py .
@@ -11,6 +16,12 @@ COPY requirements.txt .
 
 # Install all dependencies from requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+
+# --- IMPORTANT: Download spaCy models after pip install ---
+# Based on your error logs, your application tries to load both.
+# Ensure these commands are run AFTER pip install.
+RUN python -m spacy download en_core_web_sm
+RUN python -m spacy download en_core_web_lg
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8001}/ || exit 1
