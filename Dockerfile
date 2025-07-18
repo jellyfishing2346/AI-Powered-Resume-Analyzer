@@ -23,6 +23,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m spacy download en_core_web_sm
 RUN python -m spacy download en_core_web_lg
 
+# --- IMPORTANT: Download NLTK data after pip install ---
+# This is required for pyresparser (or any other NLTK usage) that relies on specific corpora.
+RUN python -c "import nltk; nltk.download('stopwords')"
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8001}/ || exit 1
 
