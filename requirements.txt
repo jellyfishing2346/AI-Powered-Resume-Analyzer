@@ -2,7 +2,6 @@ fastapi>=0.68.0
 uvicorn>=0.15.0
 spacy>=3.0.0
 python-multipart>=0.0.5
-sentence-transformers>=2.2.0
 rapidfuzz>=3.0.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
@@ -17,8 +16,7 @@ openpyxl>=3.1.0         # Excel generation
 # Production server
 gunicorn>=20.1.0        # Production WSGI server
 
-# Added for PDF/DOCX/Advanced Parsing support (from previous warnings)
+# PDF/DOCX support (pdfplumber and python-docx are relatively smaller)
 pdfplumber>=0.11.0
 python-docx>=1.1.0
-pyresparser>=0.1.0
 nltk>=3.8.1 # Explicitly adding NLTK
