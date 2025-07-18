@@ -13,21 +13,22 @@ RUN apt-get update && \
 COPY main.py .
 COPY database.py* ./
 COPY requirements.txt .
+COPY skills.txt . 
 
 # Install all dependencies from requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# --- IMPORTANT: Download spaCy models after pip install ---
-# Based on your error logs, your application tries to load both.
-# Ensure these commands are run AFTER pip install.
+# --- IMPORTANT: Download only the smaller spaCy model to save memory ---
+# As main.py now explicitly loads 'en_core_web_sm'
 RUN python -m spacy download en_core_web_sm
-RUN python -m spacy download en_core_web_lg
 
 # --- IMPORTANT: Download NLTK data after pip install ---
-# This is required for pyresparser (or any other NLTK usage) that relies on specific corpora.
+# These are required for pyresparser (or any other NLTK usage) that relies on specific corpora.
 RUN python -c "import nltk; nltk.download('stopwords')"
+RUN python -c "import nltk; nltk.download('punkt')"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8001}/ || exit 1
 
-CMD gunicorn main:app --bind 0.0.0.0:${PORT:-8001} --workers 1 --worker-class uvicorn.workers.UvicornWorker --timeout 120
+# Increased timeout to allow more time for model loading and application startup
+CMD gunicorn main:app --bind 0.0.0.0:${PORT:-8001} --workers 1 --worker-class uvicorn.workers.UvicornWorker --timeout 300
