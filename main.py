@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Set, Optional
 import io
 import tempfile
-from rapidfuzz import process, fuzz # SentenceTransformer removed
+from rapidfuzz import process, fuzz
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,15 +28,7 @@ except ImportError:
     docx = None
     logger.warning("python-docx not installed. DOCX support disabled.")
 
-# pyresparser import removed
-# try:
-#     from pyresparser import ResumeParser
-# except ImportError:
-#     ResumeParser = None
-#     logger.warning("pyresparser not installed. Advanced parsing disabled.")
-
 # --- Load spaCy models and NLTK data ---
-# Explicitly load only the smaller spaCy model to save memory.
 try:
     nlp = spacy.load("en_core_web_sm")
     logger.info("Loaded spaCy model: en_core_web_sm")
@@ -64,7 +56,6 @@ except nltk.downloader.DownloadError:
 except Exception as e:
     logger.error(f"Error checking/downloading NLTK punkt: {e}")
 
-
 # Initialize FastAPI app
 app = FastAPI(
     title="AI-Powered Resume Analyzer",
@@ -82,9 +73,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# --- SentenceTransformer model removed ---
-# st_model is no longer initialized here.
 
 # --- Helper Functions ---
 
@@ -112,10 +100,13 @@ def extract_text_from_pdf(file_path: str) -> str:
         raise HTTPException(status_code=400, detail="PDF support not available. Please install pdfplumber.")
     try:
         with pdfplumber.open(file_path) as pdf:
-            return "\n".join(page.extract_text() or '' for page in pdf.pages)
+            text = "\n".join(page.extract_text() or '' for page in pdf.pages)
+            if not text.strip():
+                raise HTTPException(status_code=400, detail="No extractable text found in PDF. Is it a scanned image?")
+            return text
     except Exception as e:
         logger.error(f"Error extracting text from PDF: {e}")
-        raise HTTPException(status_code=400, detail="Failed to extract text from PDF file.")
+        raise HTTPException(status_code=400, detail=f"Failed to extract text from PDF file: {str(e)}")
 
 def extract_text_from_docx(file_path: str) -> str:
     """Extract text from DOCX file using python-docx."""
@@ -161,41 +152,10 @@ def extract_text(file: UploadFile) -> str:
         raise # Re-raise HTTPExceptions directly
     except Exception as e:
         logger.error(f"Error processing file {file.filename}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to process the uploaded file.")
+        raise HTTPException(status_code=500, detail=f"Failed to process the uploaded file: {str(e)}")
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
-
-# pyresparser parsing function removed
-# def parse_resume_with_pyresparser(file: UploadFile) -> Optional[Dict]:
-#     """Parse resume using pyresparser for advanced extraction."""
-#     if ResumeParser is None:
-#         logger.warning("pyresparser not available for advanced parsing.")
-#         return None
-    
-#     if not file.filename:
-#         return None
-        
-#     suffix = os.path.splitext(file.filename)[1].lower()
-#     file.file.seek(0)
-    
-#     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-#         content = file.file.read()
-#         if not content:
-#             logger.warning(f"File {file.filename} is empty, cannot parse with pyresparser.")
-#             return None
-#         tmp.write(content)
-#         tmp_path = tmp.name
-    
-#     try:
-#         data = ResumeParser(tmp_path).get_extracted_data()
-#         return data
-#     except Exception as e:
-#         logger.warning(f"pyresparser failed for {file.filename}: {e}", exc_info=True)
-#         return None
-#     finally:
-#         if os.path.exists(tmp_path):
-#             os.remove(tmp_path)
 
 def extract_entities(text: str) -> List[Dict[str, str]]:
     """Extract named entities from text using spaCy NLP."""
@@ -294,10 +254,8 @@ def analyze_resume_vs_job(resume_text: str, job_text: str) -> Dict:
         
         skill_match_percentage = (len(matched_skills) / len(job_skills) * 100) if job_skills else 0
         
-        # Semantic similarity calculation removed
         semantic_similarity = 0.0 
         
-        # Adjust overall_score calculation as SentenceTransformer is removed
         overall_score = skill_match_percentage / 100 
         
         return {
@@ -352,19 +310,30 @@ async def analyze_resume(file: UploadFile = File(..., description="Resume file (
     """
     logger.info(f"Received file for analysis: {file.filename}")
     try:
-        # pyresparser_data = parse_resume_with_pyresparser(file) # Removed call to pyresparser
-        
         file.file.seek(0) 
         text = extract_text(file)
         
+        logger.info(f"Extracted text length: {len(text)}")
+        if len(text) < 100:
+            logger.info(f"Extracted text preview: {text}")
+        else:
+            logger.info(f"Extracted text preview: {text[:100]}...")
+
         if not text.strip():
+            logger.warning(f"No text content found in {file.filename} after extraction.")
             raise HTTPException(status_code=400, detail="No text content found in the uploaded file.")
         
         entities = extract_entities(text)
-        skills = list(extract_skills(text)) # Convert set to list for JSON serialization
+        skills = list(extract_skills(text))
         summary = extract_summary(text)
         education = extract_education(text)
         experience = extract_experience(text)
+
+        logger.info(f"Entities extracted: {len(entities)}")
+        logger.info(f"Skills extracted: {len(skills)}")
+        logger.info(f"Summary extracted: {summary[:50]}...")
+        logger.info(f"Education extracted: {education}")
+        logger.info(f"Experience extracted: {experience}")
         
         result = {
             "filename": file.filename,
@@ -378,15 +347,6 @@ async def analyze_resume(file: UploadFile = File(..., description="Resume file (
             "text_length": len(text)
         }
         
-        # if pyresparser_data: # Removed pyresparser data merging
-        #     result["advanced_parsing"] = pyresparser_data
-        #     if pyresparser_data.get("name"):
-        #         result["name"] = pyresparser_data["name"]
-        #     if pyresparser_data.get("email"):
-        #         result["email"] = pyresparser_data["email"]
-        #     if pyresparser_data.get("phone"):
-        #         result["phone"] = pyresparser_data["phone"]
-            
         logger.info(f"Successfully analyzed resume: {file.filename}")
         return result
         
@@ -394,7 +354,7 @@ async def analyze_resume(file: UploadFile = File(..., description="Resume file (
         raise
     except Exception as e:
         logger.error(f"Error analyzing resume {file.filename}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to analyze the resume.")
+        raise HTTPException(status_code=500, detail=f"Failed to analyze the resume: {str(e)}")
 
 @app.post("/match_resume/", tags=["Resume Analysis"])
 async def match_resume(
@@ -440,7 +400,7 @@ async def match_resume(
         raise
     except Exception as e:
         logger.error(f"Error matching resume {resume.filename}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to match resume against job description.")
+        raise HTTPException(status_code=500, detail=f"Failed to match resume against job description: {str(e)}")
 
 @app.post("/rank_candidates/", tags=["Candidate Ranking"])
 async def rank_candidates(
@@ -474,6 +434,11 @@ async def rank_candidates(
                 
                 if not text.strip():
                     logger.warning(f"Empty content in file: {file.filename}. Skipping.")
+                    results.append({
+                        "filename": file.filename,
+                        "error": "No text content found in the uploaded file.",
+                        "overall_score": 0
+                    })
                     continue
                 
                 analysis = analyze_resume_vs_job(text, job_text)
@@ -531,4 +496,4 @@ async def rank_candidates(
         raise
     except Exception as e:
         logger.error(f"Error ranking candidates: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to rank candidates.")
+        raise HTTPException(status_code=500, detail=f"Failed to rank candidates: {str(e)}")
