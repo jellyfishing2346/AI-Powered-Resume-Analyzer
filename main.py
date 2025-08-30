@@ -169,27 +169,28 @@ def extract_entities(text: str) -> List[Dict[str, str]]:
         return []
 
 def extract_skills(text: str, skill_set: Set[str] = COMMON_SKILLS) -> Set[str]:
-    """Extract skills from text using fuzzy matching and NER."""
+    import re
     if not text.strip():
         return set()
-        
     text_lower = text.lower()
     found = set()
-    
     try:
         for skill in skill_set:
-            match_result = process.extractOne(skill, [text_lower], scorer=fuzz.partial_ratio)
-            if match_result and match_result[1] >= 85:
-                found.add(skill)
-        
+            # For short skills (<=2 chars), require whole word match
+            if len(skill) <= 2:
+                if re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
+                    found.add(skill)
+            else:
+                match_result = process.extractOne(skill, [text_lower], scorer=fuzz.partial_ratio)
+                if match_result and match_result[1] >= 85:
+                    found.add(skill)
+        # NER logic (optional, keep as in your code)
         doc = nlp(text)
         for ent in doc.ents:
             if ent.text.lower() in skill_set:
                 found.add(ent.text.lower())
-                
     except Exception as e:
         logger.error(f"Error extracting skills: {e}", exc_info=True)
-    
     return found
 
 def extract_summary(text: str) -> str:
