@@ -37,6 +37,10 @@ function ResumeAnalyzerForm() {
       const response = await axios.post(url, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+
+      // 👇 ADD THIS LINE TO INSPECT THE RESPONSE
+      console.log("API Response Data:", response.data);
+
       setResult(response.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
