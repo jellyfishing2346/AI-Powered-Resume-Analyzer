@@ -11,6 +11,16 @@ import io
 import tempfile
 from rapidfuzz import process, fuzz
 
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -170,25 +180,37 @@ def extract_entities(text: str) -> List[Dict[str, str]]:
 
 def extract_skills(text: str, skill_set: Set[str] = COMMON_SKILLS) -> Set[str]:
     import re
+    from rapidfuzz import fuzz, process
+
     if not text.strip():
         return set()
     text_lower = text.lower()
+    tokens = set(re.findall(r'\b\w+\b', text_lower))
     found = set()
     try:
         for skill in skill_set:
-            # For short skills (<=2 chars), require whole word match
-            if len(skill) <= 2:
-                if re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
+            skill_lower = skill.lower()
+            # Whole word match for all skills
+            if skill_lower in tokens:
+                found.add(skill)
+                logger.info(f"Token match: {skill}")
+                continue
+            # For multi-word skills, use regex for phrase match
+            if len(skill_lower.split()) > 1 and re.search(r'\b' + re.escape(skill_lower) + r'\b', text_lower):
+                found.add(skill)
+                logger.info(f"Phrase regex match: {skill}")
+                continue
+            # Fuzzy match for multi-word skills only
+            if len(skill_lower.split()) > 1:
+                match_result = process.extractOne(skill_lower, [text_lower], scorer=fuzz.token_set_ratio)
+                if match_result and match_result[1] >= 80:
                     found.add(skill)
-            else:
-                match_result = process.extractOne(skill, [text_lower], scorer=fuzz.partial_ratio)
-                if match_result and match_result[1] >= 85:
-                    found.add(skill)
-        # NER logic (optional, keep as in your code)
-        doc = nlp(text)
-        for ent in doc.ents:
-            if ent.text.lower() in skill_set:
-                found.add(ent.text.lower())
+                    logger.info(f"Fuzzy match: {skill} (score: {match_result[1]})")
+        # Optionally, keep NER logic if you find it useful
+        # doc = nlp(text)
+        # for ent in doc.ents:
+        #     if ent.text.lower() in skill_set:
+        #         found.add(ent.text.lower())
     except Exception as e:
         logger.error(f"Error extracting skills: {e}", exc_info=True)
     return found
