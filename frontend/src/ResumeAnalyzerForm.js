@@ -17,34 +17,45 @@ function ResumeAnalyzerForm() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setResult(null);
-  if (!resume || !jobDescription) {
-    setError('Please upload a resume and enter a job description.');
-    return;
-  }
-  setLoading(true);
-  try {
-    const formData = new FormData();
-    if (endpoint === 'analyze_resume') {
-      formData.append('file', resume); // backend expects 'file'
-    } else if (endpoint === 'match_resume') {
-      formData.append('resume', resume); // backend expects 'resume'
-      formData.append('job_description', jobDescription);
+    e.preventDefault();
+    setError('');
+    setResult(null);
+    if (!resume || !jobDescription) {
+      setError('Please upload a resume and enter a job description.');
+      return;
     }
-    const url = `${API_BASE}/${endpoint}/`;
-    const response = await axios.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    setResult(response.data);
-  } catch (err) {
-    setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
-    console.error('API Error:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      if (endpoint === 'analyze_resume') {
+        formData.append('file', resume); // backend expects 'file'
+      } else if (endpoint === 'match_resume') {
+        formData.append('resume', resume); // backend expects 'resume'
+        formData.append('job_description', jobDescription);
+      }
+      const url = `${API_BASE}/${endpoint}/`;
+      const response = await axios.post(url, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setResult(response.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
+      console.error('API Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper to get the correct skills array based on endpoint and response
+  const getSkills = () => {
+    if (!result) return [];
+    if (endpoint === 'analyze_resume') {
+      return result.skills || result.analysis?.skills || [];
+    } else if (endpoint === 'match_resume') {
+      return result.analysis?.matched_skills || [];
+    }
+    return [];
+  };
 
   return (
     <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, mb: 5, borderRadius: 3, boxShadow: 4, background: 'rgba(255,255,255,0.98)' }}>
@@ -110,7 +121,7 @@ function ResumeAnalyzerForm() {
               <Paper variant="outlined" sx={{ p: 2, mb: 2, background: '#f5f7fa', borderRadius: 2 }}>
                 <Typography variant="subtitle1"><b>Match Score:</b> {result.analysis.match_score ? (result.analysis.match_score * 100).toFixed(1) + '%' : 'N/A'}</Typography>
                 <Typography variant="subtitle1" sx={{ mt: 1 }}><b>Word Count:</b> {result.analysis.word_count}</Typography>
-                <Typography variant="subtitle1" sx={{ mt: 1 }}><b>Skills Found:</b> {result.analysis.skill_count}</Typography>
+                <Typography variant="subtitle1" sx={{ mt: 1 }}><b>Skills Found:</b> {getSkills().length}</Typography>
                 <Typography variant="subtitle1" sx={{ mt: 1 }}><b>Entities:</b> {result.analysis.entities?.length || 0}</Typography>
               </Paper>
             </Grid>
@@ -125,7 +136,7 @@ function ResumeAnalyzerForm() {
               <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Skills Found:</b></Typography>
               <Paper variant="outlined" sx={{ p: 2, mt: 1, maxHeight: 150, overflow: 'auto', background: '#fafafa', borderRadius: 2 }}>
                 <Typography variant="body2">
-                  {result.analysis.skills?.length > 0 ? result.analysis.skills.join(', ') : 'No skills detected'}
+                  {getSkills().length > 0 ? getSkills().join(', ') : 'No skills detected'}
                 </Typography>
               </Paper>
             </Grid>
