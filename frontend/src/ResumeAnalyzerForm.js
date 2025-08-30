@@ -17,38 +17,52 @@ function ResumeAnalyzerForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setResult(null);
-    if (!resume || !jobDescription) {
-      setError('Please upload a resume and enter a job description.');
-      return;
+  e.preventDefault();
+  setError('');
+  setResult(null);
+  if (!resume || !jobDescription) {
+    setError('Please upload a resume and enter a job description.');
+    return;
+  }
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    if (endpoint === 'analyze_resume') {
+      formData.append('file', resume);
+    } else if (endpoint === 'match_resume') {
+      formData.append('resume', resume);
+      formData.append('job_description', jobDescription);
     }
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      if (endpoint === 'analyze_resume') {
-        formData.append('file', resume); // backend expects 'file'
-      } else if (endpoint === 'match_resume') {
-        formData.append('resume', resume); // backend expects 'resume'
-        formData.append('job_description', jobDescription);
-      }
-      const url = `${API_BASE}/${endpoint}/`;
-      const response = await axios.post(url, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    const url = `${API_BASE}/${endpoint}/`;
+    const response = await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
 
-      // 👇 ADD THIS LINE TO INSPECT THE RESPONSE
-      console.log("API Response Data:", response.data);
-
-      setResult(response.data);
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
-      console.error('API Error:', err);
-    } finally {
-      setLoading(false);
+    let data = response.data;
+    // Patch: wrap analyze_resume response in an "analysis" object for frontend consistency
+    if (endpoint === 'analyze_resume' && !data.analysis) {
+      data = {
+        ...data,
+        analysis: {
+          match_score: null,
+          word_count: data.text_length,
+          skills: data.skills,
+          skill_count: data.skills_count,
+          entities: data.entities,
+        },
+        success: true,
+        filename: data.filename,
+        metadata: { file_size: data.text_length },
+      };
     }
-  };
+    setResult(data);
+  } catch (err) {
+    setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
+    console.error('API Error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Helper to get the correct skills array based on endpoint and response
   const getSkills = () => {
