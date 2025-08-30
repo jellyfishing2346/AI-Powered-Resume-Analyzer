@@ -11,7 +11,25 @@ import io
 import tempfile
 from rapidfuzz import process, fuzz
 
-app = FastAPI()
+# REMOVE this line:
+# app = FastAPI()
+
+# KEEP ONLY THIS:
+app = FastAPI(
+    title="AI-Powered Resume Analyzer",
+    description="A high-performance API for automated resume analysis and candidate ranking using advanced NLP techniques.",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify your Netlify URL for more security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
