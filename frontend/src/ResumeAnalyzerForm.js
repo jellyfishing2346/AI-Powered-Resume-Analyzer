@@ -41,7 +41,6 @@ function ResumeAnalyzerForm() {
       let data = response.data;
       // Patch: wrap analyze_resume response in an "analysis" object for frontend consistency
       if (endpoint === 'analyze_resume') {
-        // If analysis is missing, wrap the response
         if (!data.analysis) {
           data = {
             ...data,
@@ -57,7 +56,6 @@ function ResumeAnalyzerForm() {
             metadata: { file_size: data.text_length },
           };
         }
-        // If file_size or success is missing, patch them
         if (!data.metadata) {
           data.metadata = { file_size: data.text_length || 0 };
         }
@@ -83,6 +81,23 @@ function ResumeAnalyzerForm() {
       return result.analysis?.matched_skills || [];
     }
     return [];
+  };
+
+  // Helper to get skill groups for match_resume
+  const getSkillGroups = () => {
+    if (!result || !result.analysis) return {};
+    if (endpoint === 'match_resume') {
+      return {
+        matched: result.analysis.matched_skills || [],
+        missing: result.analysis.missing_skills || [],
+        extra: result.analysis.extra_skills || [],
+      };
+    }
+    return {
+      matched: [],
+      missing: [],
+      extra: [],
+    };
   };
 
   return (
@@ -160,14 +175,37 @@ function ResumeAnalyzerForm() {
                 <Typography variant="subtitle1" sx={{ mt: 1 }}><b>Status:</b> {result.success ? 'Success' : 'Failed'}</Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Skills Found:</b></Typography>
-              <Paper variant="outlined" sx={{ p: 2, mt: 1, maxHeight: 150, overflow: 'auto', background: '#fafafa', borderRadius: 2 }}>
-                <Typography variant="body2">
-                  {getSkills().length > 0 ? getSkills().join(', ') : 'No skills detected'}
-                </Typography>
-              </Paper>
-            </Grid>
+            {endpoint === 'match_resume' ? (
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Matched Skills:</b></Typography>
+                <Paper variant="outlined" sx={{ p: 2, mt: 1, mb: 1, background: '#fafafa', borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    {getSkillGroups().matched.length > 0 ? getSkillGroups().matched.join(', ') : 'No matched skills'}
+                  </Typography>
+                </Paper>
+                <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Missing Skills (from job):</b></Typography>
+                <Paper variant="outlined" sx={{ p: 2, mt: 1, mb: 1, background: '#fafafa', borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    {getSkillGroups().missing.length > 0 ? getSkillGroups().missing.join(', ') : 'No missing skills'}
+                  </Typography>
+                </Paper>
+                <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Extra Skills (in resume only):</b></Typography>
+                <Paper variant="outlined" sx={{ p: 2, mt: 1, background: '#fafafa', borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    {getSkillGroups().extra.length > 0 ? getSkillGroups().extra.join(', ') : 'No extra skills'}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ) : (
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Skills Found:</b></Typography>
+                <Paper variant="outlined" sx={{ p: 2, mt: 1, maxHeight: 150, overflow: 'auto', background: '#fafafa', borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    {getSkills().length > 0 ? getSkills().join(', ') : 'No skills detected'}
+                  </Typography>
+                </Paper>
+              </Grid>
+            )}
             <Grid item xs={12}>
               <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 600 }}><b>Named Entities:</b></Typography>
               <Paper variant="outlined" sx={{ p: 2, mt: 1, maxHeight: 200, overflow: 'auto', background: '#fafafa', borderRadius: 2 }}>
