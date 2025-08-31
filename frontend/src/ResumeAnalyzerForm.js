@@ -17,58 +17,68 @@ function ResumeAnalyzerForm() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setResult(null);
-  if (!resume || !jobDescription) {
-    setError('Please upload a resume and enter a job description.');
-    return;
-  }
-  setLoading(true);
-  try {
-    const formData = new FormData();
-    if (endpoint === 'analyze_resume') {
-      formData.append('file', resume);
-    } else if (endpoint === 'match_resume') {
-      formData.append('resume', resume);
-      formData.append('job_description', jobDescription);
+    e.preventDefault();
+    setError('');
+    setResult(null);
+    if (!resume || !jobDescription) {
+      setError('Please upload a resume and enter a job description.');
+      return;
     }
-    const url = `${API_BASE}/${endpoint}/`;
-    const response = await axios.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      if (endpoint === 'analyze_resume') {
+        formData.append('file', resume);
+      } else if (endpoint === 'match_resume') {
+        formData.append('resume', resume);
+        formData.append('job_description', jobDescription);
+      }
+      const url = `${API_BASE}/${endpoint}/`;
+      const response = await axios.post(url, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
-    let data = response.data;
-    // Patch: wrap analyze_resume response in an "analysis" object for frontend consistency
-    if (endpoint === 'analyze_resume' && !data.analysis) {
-      data = {
-        ...data,
-        analysis: {
-          match_score: null,
-          word_count: data.text_length,
-          skills: data.skills,
-          skill_count: data.skills_count,
-          entities: data.entities,
-        },
-        success: true,
-        filename: data.filename,
-        metadata: { file_size: data.text_length },
-      };
+      let data = response.data;
+      // Patch: wrap analyze_resume response in an "analysis" object for frontend consistency
+      if (endpoint === 'analyze_resume') {
+        // If analysis is missing, wrap the response
+        if (!data.analysis) {
+          data = {
+            ...data,
+            analysis: {
+              match_score: null,
+              word_count: data.text_length,
+              skills: data.skills,
+              skill_count: data.skills_count,
+              entities: data.entities,
+            },
+            success: true,
+            filename: data.filename,
+            metadata: { file_size: data.text_length },
+          };
+        }
+        // If file_size or success is missing, patch them
+        if (!data.metadata) {
+          data.metadata = { file_size: data.text_length || 0 };
+        }
+        if (typeof data.success === 'undefined') {
+          data.success = true;
+        }
+      }
+      setResult(data);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
+      console.error('API Error:', err);
+    } finally {
+      setLoading(false);
     }
-    setResult(data);
-  } catch (err) {
-    setError(err.response?.data?.detail || 'Failed to analyze resume. Please try again.');
-    console.error('API Error:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Helper to get the correct skills array based on endpoint and response
   const getSkills = () => {
     if (!result) return [];
     if (endpoint === 'analyze_resume') {
-      return result.skills || result.analysis?.skills || [];
+      return result.analysis?.skills || [];
     } else if (endpoint === 'match_resume') {
       return result.analysis?.matched_skills || [];
     }
