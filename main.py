@@ -59,7 +59,7 @@ except OSError as e:
 try:
     nltk.data.find('corpora/stopwords')
     logger.info("NLTK 'stopwords' corpus already downloaded.")
-except nltk.downloader.DownloadError:
+except LookupError:
     logger.info("Downloading NLTK 'stopwords' corpus...")
     nltk.download('stopwords')
     logger.info("NLTK 'stopwords' corpus downloaded.")
@@ -69,7 +69,7 @@ except Exception as e:
 try:
     nltk.data.find('tokenizers/punkt')
     logger.info("NLTK 'punkt' tokenizer already downloaded.")
-except nltk.downloader.DownloadError:
+except LookupError:
     logger.info("Downloading NLTK 'punkt' tokenizer...")
     nltk.download('punkt')
     logger.info("NLTK 'punkt' tokenizer downloaded.")

@@ -185,7 +185,7 @@ class ResumeAnalyzerTester:
         try:
             import sys
             sys.path.append('.')
-            from database import db_manager
+            from backend.database.operations import db_manager
             
             # Get current count
             stats_before = db_manager.get_stats()

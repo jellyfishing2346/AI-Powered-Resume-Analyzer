@@ -135,7 +135,7 @@ python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_lg
 
 # Initialize database
-python3 -c "from database import db_manager; db_manager.init_database()"
+python3 -c "from backend.database.operations import db_manager; db_manager.init_database()"
 
 # Start API server
 python3 test_api_clean.py

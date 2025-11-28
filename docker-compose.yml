@@ -10,7 +10,7 @@ services:
       - API_PORT=8001
       - LOG_LEVEL=INFO
     volumes:
-      - ./skills.txt:/app/skills.txt
+      - ./backend/data/skills.txt:/app/skills.txt
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -27,7 +27,6 @@ services:
     depends_on:
       - api
     restart: unless-stopped
-
-networks:
+## docker-compose configuration moved to `deployment/docker-compose.yml`.
+## Use `docker-compose -f deployment/docker-compose.yml up --build` to run the service.
   default:
-    name: resume-analyzer-network
