@@ -1,0 +1,50 @@
+python
+java
+c++
+c#
+javascript
+typescript
+html
+css
+sql
+nosql
+mongodb
+postgresql
+mysql
+linux
+windows
+macos
+machine learning
+deep learning
+nlp
+computer vision
+data analysis
+data science
+statistics
+project management
+scrum
+agile
+git
+github
+communication
+leadership
+problem solving
+teamwork
+tensorflow
+pytorch
+react
+node.js
+flask
+django
+fastapi
+rest api
+graphql
+ci/cd
+unit testing
+selenium
+pytest
+docker
+kubernetes
+aws
+gcp
+azure

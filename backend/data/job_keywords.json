@@ -1,0 +1,4 @@
+{
+  "software_engineer": ["python", "docker", "rest api", "sql", "git"],
+  "data_scientist": ["python", "pandas", "numpy", "ml", "nlp"]
+}

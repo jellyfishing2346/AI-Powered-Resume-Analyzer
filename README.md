@@ -1,3 +1,35 @@
+# AI-Resume-Analyzer
+
+This repository has been reorganized to a streamlined structure.
+
+Project layout:
+
+AI-Resume-Analyzer/
+- backend/
+  - core/ (analyzer, matcher, optimizer, skills extractor)
+  - api/ (FastAPI server entrypoint)
+  - data/ (skills list, job and ATS keywords)
+  - database/ (models and operations)
+  - utils/ (file processing, text utils)
+- frontend/ (React app)
+- tests/ (test fixtures and consolidated test suite)
+- deployment/ (Dockerfile and docker-compose for deployment)
+- .env.example
+- requirements.txt
+
+Notes:
+- The `backend/api/main.py` file re-exports the FastAPI `app` defined in the
+  legacy `main.py` at the repository root for backward compatibility. You can
+  migrate the endpoint definitions into `backend/api/routes/` when ready.
+- `backend/data/skills.txt` contains the canonical skills list used by the
+  analyzer; add `job_keywords.json` and `ats_keywords.json` for richer behavior.
+
+Next steps:
+- Move endpoint code from the legacy `main.py` into `backend/api/routes/`.
+- Replace the small placeholder modules under `backend/core` with fully
+  separated implementations (split the large `main.py` logic into modules).
+- Update CI and Docker build configs to use `deployment/Dockerfile` and
+  `deployment/docker-compose.yml` if desired.
 # AI-Powered Resume Analyzer 🚀
 
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
