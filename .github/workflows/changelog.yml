@@ -1,0 +1,33 @@
+name: Generate Changelog
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  changelog:
+    name: Generate Release Changelog
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate changelog
+      uses: orhun/git-cliff-action@v3
+      with:
+        config: cliff.toml
+        args: --verbose --unreleased --tag ${{ github.ref_name }}
+      env:
+        OUTPUT: CHANGELOG.md
+
+    - name: Commit changelog
+      run: |
+        git config user.name 'github-actions[bot]'
+        git config user.email 'github-actions[bot]@users.noreply.github.com'
+        git add CHANGELOG.md
+        git commit -m "docs: update changelog for ${{ github.ref_name }}" || true
+        git push || true

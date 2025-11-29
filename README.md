@@ -1,397 +1,444 @@
-# AI-Resume-Analyzer
-
-This repository has been reorganized to a streamlined structure.
-
-Project layout:
-
-AI-Resume-Analyzer/
-- backend/
-  - core/ (analyzer, matcher, optimizer, skills extractor)
-  - api/ (FastAPI server entrypoint)
-  - data/ (skills list, job and ATS keywords)
-  - database/ (models and operations)
-  - utils/ (file processing, text utils)
-- frontend/ (React app)
-- tests/ (test fixtures and consolidated test suite)
-- deployment/ (Dockerfile and docker-compose for deployment)
-- .env.example
-- requirements.txt
-
-Notes:
-- The `backend/api/main.py` file re-exports the FastAPI `app` defined in the
-  legacy `main.py` at the repository root for backward compatibility. You can
-  migrate the endpoint definitions into `backend/api/routes/` when ready.
-- `backend/data/skills.txt` contains the canonical skills list used by the
-  analyzer; add `job_keywords.json` and `ats_keywords.json` for richer behavior.
-
-Next steps:
-- Move endpoint code from the legacy `main.py` into `backend/api/routes/`.
-- Replace the small placeholder modules under `backend/core` with fully
-  separated implementations (split the large `main.py` logic into modules).
-- Update CI and Docker build configs to use `deployment/Dockerfile` and
-  `deployment/docker-compose.yml` if desired.
-# AI-Powered Resume Analyzer 🚀
-
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![spaCy](https://img.shields.io/badge/spaCy-09A3D5?style=for-the-badge&logo=spacy&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-
-A production-ready AI-powered resume analysis and candidate ranking system with advanced NLP capabilities, modern web interface, and comprehensive database integration.
-
-## 🌟 Features
-
-### 🤖 Advanced AI Analysis
-- **Semantic Matching**: Uses Sentence Transformers (all-MiniLM-L6-v2) for intelligent similarity scoring
-- **Named Entity Recognition**: Extracts people, organizations, locations, dates using spaCy (en_core_web_lg)
-- **Skills Intelligence**: Identifies 184+ technical and professional skills with fuzzy matching
-- **Smart Ranking**: Multi-factor candidate ranking algorithm with weighted scoring
-
-### 📁 Multi-Format Support
-- **PDF Processing**: Advanced text extraction with pdfplumber
-- **DOCX/DOC Files**: Microsoft Word document parsing
-- **Text Files**: Direct text analysis
-- **Batch Processing**: Analyze multiple resumes simultaneously
-
-### 🎨 Modern Web Interface
-- **React Frontend**: Professional, responsive UI with Material Design
-- **Real-time Analysis**: Live results with progress indicators
-- **Interactive Rankings**: Sortable candidate comparisons with detailed breakdowns
-- **Export Capabilities**: PDF and Excel export functionality
-- **Dashboard Analytics**: Visual insights and statistics
-
-### 🗄️ Database Integration
-- **SQLite Development**: Local database for development and testing
-- **PostgreSQL Production**: Production-ready database support
-- **Analytics Tracking**: Historical analysis and ranking data
-- **Performance Metrics**: Success rates and usage statistics
-
-### 🚀 Production Ready
-- **RESTful API**: Comprehensive FastAPI with automatic documentation
-- **Docker Support**: Containerized deployment with docker-compose
-- **Health Monitoring**: Built-in health checks and monitoring endpoints
-- **Error Handling**: Robust error handling and logging
-- **CORS Configuration**: Secure cross-origin resource sharing
-
-## 🌐 Live Deployment
-
-### 🎉 **LIVE APPLICATION**
-- **🌟 Frontend (Web App)**: https://bucolic-syrniki-823087.netlify.app/
-- **⚡ Backend (API)**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/
-- **📚 API Documentation**: https://ai-powered-resume-analyzer-1-i3r9.onrender.com/docs
-
-### � **Try It Now!**
-1. **Visit the Web App**: Click the frontend link above
-2. **Upload a Resume**: Use the file upload interface
-3. **Enter Job Description**: Paste or type the job requirements
-4. **Get AI Analysis**: View detailed matching results and scoring
-
-## 📊 Local Development
-
-### API Documentation
-- **Interactive Docs**: [http://localhost:8001/docs](http://localhost:8001/docs)
-- **ReDoc**: [http://localhost:8001/redoc](http://localhost:8001/redoc)
-
-### Web Interface
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Health Check**: [http://localhost:8001/health](http://localhost:8001/health)
-
-## 🚀 Quick Start
-
-### Option 1: Automated Deployment (Recommended)
-```bash
-# Clone the repository
-git clone https://github.com/your-username/AI-Powered-Resume-Analyzer.git
-cd AI-Powered-Resume-Analyzer
-
-# Run automated deployment
-chmod +x deploy.sh
-./deploy.sh
-```
-
-This will:
-- ✅ Set up Python virtual environment
-- ✅ Install all dependencies
-- ✅ Download spaCy models
-- ✅ Initialize database
-- ✅ Start API server on port 8001
-- ✅ Start React frontend on port 3000
-- ✅ Run comprehensive tests
-
-### Option 2: Manual Setup
-
-#### Backend Setup
-```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Download spaCy models
-python -m spacy download en_core_web_sm
-python -m spacy download en_core_web_lg
-
-# Initialize database
-python3 -c "from backend.database.operations import db_manager; db_manager.init_database()"
-
-# Start API server
-python3 test_api_clean.py
-```
-
-#### Frontend Setup
-```bash
-cd frontend
-npm install
-npm start
-```
-
-### Option 3: Docker Deployment
-```bash
-# Start all services
-docker-compose up --build
-
-# Or build and run manually
-docker build -t resume-analyzer .
-docker run -p 8001:8001 resume-analyzer
-```
-
-## 🔧 API Endpoints
-
-### Core Analysis
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/analyze` | POST | Analyze single resume with job description |
-| `/rank` | POST | Rank multiple candidates against job requirements |
-| `/health` | GET | Health check and system status |
-| `/` | GET | API information and feature summary |
-
-### Database Operations
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/stats` | GET | Database statistics and insights |
-| `/history/analyses` | GET | Historical analysis records |
-| `/history/rankings` | GET | Historical ranking records |
-| `/analysis/{id}` | GET | Detailed analysis by ID |
-| `/ranking/{id}` | GET | Detailed ranking by ID |
-
-### Example Usage
-
-#### Analyze Single Resume
-```bash
-curl -X POST "http://localhost:8001/analyze" \
-  -F "file=@resume.pdf" \
-  -F "job_description=Senior Python Developer with Django experience"
-```
-
-#### Rank Multiple Candidates
-```bash
-curl -X POST "http://localhost:8001/rank" \
-  -F "files=@resume1.pdf" \
-  -F "files=@resume2.pdf" \
-  -F "files=@resume3.pdf" \
-  -F "job_description=Full Stack Developer with React and Python"
-```
-
-## 📁 Project Structure
-
-```
-AI-Powered-Resume-Analyzer/
-├── 🔧 Backend
-│   ├── test_api_clean.py          # Main API server
-│   ├── database.py                # Database operations
-│   ├── database_production.py     # Production DB config
-│   ├── main.py                    # Alternative API server
-│   └── skills.txt                 # Skills database (184 skills)
-├── 🎨 Frontend
-│   ├── src/
-│   │   ├── App.js                 # Main React application
-│   │   ├── ResumeAnalyzerForm.js  # Analysis form component
-│   │   └── CandidateRanking.js    # Ranking display component
-│   └── package.json               # Frontend dependencies
-├── 🚀 Deployment
-│   ├── Dockerfile                 # Container configuration
-│   ├── docker-compose.yml         # Multi-service setup
-│   ├── railway.toml               # Railway deployment config
-│   ├── deploy.sh                  # Automated deployment script
-│   └── deployment_selector.py     # Platform selection tool
-├── 🧪 Testing
-│   ├── test_comprehensive.py      # Full test suite
-│   ├── test_api_clean.py          # API testing
-│   ├── sample_resume*.txt         # Test resume files
-│   └── test_report.json           # Test results
-├── 📚 Documentation
-│   ├── README.md                  # This file
-│   ├── DEPLOYMENT_GUIDE.md        # Deployment instructions
-│   ├── PROJECT_COMPLETION_SUMMARY.md # Project overview
-│   └── EXAMPLES.md                # Usage examples
-└── ⚙️ Configuration
-    ├── requirements.txt           # Python dependencies
-    ├── requirements-optional.txt  # Optional dependencies
-    └── .env.example              # Environment variables template
-```
-
-## 🧪 Testing
-
-### Comprehensive Test Suite
-```bash
-# Run all tests
-python3 test_comprehensive.py
-
-# Expected Results:
-# ✅ API Health Check
-# ✅ Frontend Accessibility  
-# ✅ Resume Analysis
-# ✅ Multi-Resume Ranking
-# ✅ Skills Extraction
-# ✅ Entity Recognition
-# ✅ Match Score Calculation
-# ✅ Database Integration
-# ✅ File Upload Validation
-# ✅ Error Handling
-# 
-# Success Rate: 100%
-```
-
-### Manual Testing
-```bash
-# Test individual endpoints
-curl http://localhost:8001/health
-curl http://localhost:8001/
-
-# Check server status
-./check_status.sh
-```
-
-## 🚀 Deployment Options
-
-### Recommended: Railway
-- **Cost**: ~$5/month
-- **Features**: PostgreSQL included, auto-SSL, GitHub integration
-- **Setup**: Connect GitHub repo → auto-deploy
-
-### Alternative: Render
-- **Cost**: Free tier available
-- **Features**: PostgreSQL, auto-SSL, GitHub integration
-- **Setup**: Uses render.yaml for configuration
-
-### Professional: DigitalOcean
-- **Cost**: ~$12/month
-- **Features**: App Platform, managed databases
-- **Setup**: Uses .do/app.yaml configuration
-
-### Choose Your Platform
-```bash
-# Interactive deployment tool
-python3 deployment_selector.py
-```
-
-## 💡 Key Technologies
-
-### Backend Stack
-- **FastAPI**: Modern Python web framework
-- **spaCy**: Industrial-strength NLP (en_core_web_lg)
-- **Sentence Transformers**: Semantic similarity analysis
-- **RapidFuzz**: Fuzzy string matching
-- **SQLite/PostgreSQL**: Database storage
-- **Uvicorn**: High-performance ASGI server
-
-### Frontend Stack
-- **React**: Modern JavaScript framework
-- **Material-UI**: Professional UI components
-- **Axios**: HTTP client for API communication
-
-### AI/ML Models
-- **spaCy Model**: en_core_web_lg (685MB) - Advanced NLP
-- **Sentence Transformer**: all-MiniLM-L6-v2 - Semantic similarity
-- **Skills Database**: 184+ curated technical and soft skills
-
-## 📈 Performance
-
-### Analysis Speed
-- **Single Resume**: < 2 seconds
-- **Multiple Resumes**: 3-5 seconds for 3 candidates
-- **File Processing**: Supports files up to 10MB
-
-### Accuracy Metrics
-- **Skills Detection**: 90%+ accuracy on technical skills
-- **Entity Recognition**: 85%+ accuracy on standard resumes
-- **Semantic Matching**: Correlation > 0.8 with human rankings
-
-## 🔒 Security Features
-
-- **Input Validation**: Comprehensive file type and size validation
-- **Error Handling**: Secure error responses without information leakage
-- **CORS Configuration**: Properly configured for production
-- **File Processing**: Safe handling of uploaded documents
-
-## 🛠️ Development
-
-### Server Management
-```bash
-# Start servers
-./start_servers.sh
-
-# Stop servers  
-./stop_servers.sh
-
-# Check status
-./check_status.sh
-```
-
-### Environment Variables
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Key variables:
-# PORT=8001
-# LOG_LEVEL=INFO
-# DATABASE_URL=postgresql://... (production)
-```
-
-### Adding New Skills
-```bash
-# Edit skills database
-nano skills.txt
-
-# Add new skills (one per line)
-# Restart server to reload
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-- **Documentation**: Check `DEPLOYMENT_GUIDE.md` for deployment help
-- **Issues**: Use GitHub Issues for bug reports
-- **API Docs**: http://localhost:8001/docs for API reference
-
-## 🎯 Project Status
-
-**✅ PRODUCTION READY**
-- 100% test suite pass rate
-- Full feature implementation
-- Comprehensive documentation
-- Multiple deployment options
-- Modern UI/UX
-- Database integration
-- Export capabilities
+# 🚀 AI Resume Analyzer 2.0
+
+**Modern, AI-powered resume analysis and job matching system built with cutting-edge technologies.**
+
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-14+-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
 
 ---
 
-**Built with ❤️ using FastAPI, React, spaCy, and modern AI/ML technologies.**
+## 📋 Table of Contents
 
-*Last Updated: July 11, 2025*
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [API Documentation](#api-documentation)
+- [Development](#development)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+
+---
+
+## ✨ Features
+
+### 🤖 AI-Powered Analysis
+- **GPT-4 Integration** - Deep resume understanding and intelligent insights
+- **Semantic Matching** - Vector-based similarity search using embeddings
+- **Smart Skill Extraction** - Automatically identify technical and soft skills
+- **ATS Optimization** - Score and improve resumes for Applicant Tracking Systems
+- **Resume Enhancement** - AI-generated suggestions for improvement
+
+### 📊 Advanced Matching
+- **Multi-Factor Scoring** - Semantic similarity, skills, experience, and education
+- **Candidate Ranking** - Intelligent ranking of multiple candidates
+- **Gap Analysis** - Identify missing skills and experience
+- **Detailed Reports** - Comprehensive match analysis with explanations
+
+### 💾 Modern Architecture
+- **Async Everything** - Full async/await support for maximum performance
+- **Real-time Updates** - WebSocket support for live analysis
+- **Background Processing** - Celery for long-running tasks
+- **Vector Search** - PostgreSQL with pgvector for semantic search
+- **Caching** - Redis for high-performance caching
+
+### 🔐 Enterprise Ready
+- **Authentication** - JWT + OAuth2 (Google, GitHub, LinkedIn)
+- **Multi-tenant** - User isolation and data security
+- **Rate Limiting** - Prevent abuse and ensure fair usage
+- **Monitoring** - Structured logging and error tracking
+- **Scalable** - Horizontal scaling with Docker and Kubernetes
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Framework**: FastAPI 0.109+ (Async Python web framework)
+- **AI/ML**: 
+  - LangChain (LLM orchestration)
+  - OpenAI GPT-4 (Advanced analysis)
+  - Anthropic Claude (Alternative LLM)
+  - sentence-transformers (Embeddings)
+  - spaCy (NLP and NER)
+  - ChromaDB (Vector database)
+- **Database**: PostgreSQL 15+ with pgvector extension
+- **Cache/Queue**: Redis + Celery
+- **ORM**: SQLAlchemy 2.0 (Async)
+- **Migrations**: Alembic
+
+### Frontend (Coming Soon)
+- **Framework**: Next.js 14+ (React with App Router)
+- **Language**: TypeScript 5+
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State**: Zustand + TanStack Query
+- **Forms**: React Hook Form + Zod
+- **Real-time**: WebSockets / SSE
+
+### DevOps
+- **Containerization**: Docker + Docker Compose
+- **Testing**: pytest, pytest-asyncio, Playwright
+- **Code Quality**: Ruff, Black, mypy
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Structlog, Sentry
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- PostgreSQL 15+ with pgvector extension
+- Redis 7+
+- Docker & Docker Compose (recommended)
+- OpenAI API Key (required for AI features)
+
+### Option 1: Docker Compose (Recommended)
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/AI-Powered-Resume-Analyzer.git
+cd AI-Powered-Resume-Analyzer
+```
+
+2. **Configure environment**
+```bash
+cp backend/.env.example backend/.env
+# Edit backend/.env and add your OpenAI API key
+```
+
+3. **Start all services**
+```bash
+docker-compose up -d
+```
+
+4. **Access the application**
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/api/v1/docs
+- Celery Flower: http://localhost:5555
+- Frontend (coming soon): http://localhost:3000
+
+### Option 2: Local Development
+
+#### Backend Setup
+
+1. **Install Poetry** (Python dependency manager)
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+2. **Install dependencies**
+```bash
+cd backend
+poetry install
+```
+
+3. **Download spaCy model**
+```bash
+poetry run python -m spacy download en_core_web_lg
+```
+
+4. **Set up environment**
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+5. **Start PostgreSQL and Redis** (via Docker)
+```bash
+docker-compose up -d postgres redis
+```
+
+6. **Run database migrations**
+```bash
+poetry run alembic upgrade head
+```
+
+7. **Start the backend server**
+```bash
+poetry run uvicorn app.main:app --reload
+```
+
+8. **Start Celery worker** (in a new terminal)
+```bash
+poetry run celery -A app.tasks.celery_app worker --loglevel=info
+```
+
+9. **Access the API**
+- API: http://localhost:8000
+- Interactive Docs: http://localhost:8000/api/v1/docs
+- ReDoc: http://localhost:8000/api/v1/redoc
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Frontend (Next.js)                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Dashboard  │  │    Upload    │  │   Matching   │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└────────────────────────────┬────────────────────────────────┘
+                             │ HTTP / WebSocket
+┌────────────────────────────┴────────────────────────────────┐
+│                    Backend API (FastAPI)                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │   Auth   │  │ Resumes  │  │   Jobs   │  │ Matches  │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+└───┬────────────────┬────────────────┬─────────────────┬────┘
+    │                │                │                 │
+┌───▼──────────┐ ┌──▼───────────┐ ┌──▼──────────┐ ┌───▼─────────┐
+│  PostgreSQL  │ │     Redis    │ │   Celery    │ │  AI Services│
+│  (pgvector)  │ │   (Cache)    │ │  (Tasks)    │ │  (GPT-4)    │
+└──────────────┘ └──────────────┘ └─────────────┘ └─────────────┘
+```
+
+### Key Components
+
+- **FastAPI Backend**: Async REST API with automatic OpenAPI documentation
+- **PostgreSQL**: Primary database with pgvector for semantic search
+- **Redis**: Caching, rate limiting, and Celery message broker
+- **Celery**: Async task queue for resume processing
+- **AI Services**: LangChain + OpenAI/Claude for intelligent analysis
+- **ChromaDB**: Vector store for embeddings
+
+---
+
+## 📚 API Documentation
+
+### Authentication
+
+```bash
+# Register a new user
+POST /api/v1/auth/register
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "full_name": "John Doe"
+}
+
+# Login
+POST /api/v1/auth/login
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+
+### Resume Management
+
+```bash
+# Upload a resume
+POST /api/v1/resumes/upload
+Content-Type: multipart/form-data
+file: resume.pdf
+
+# Get resume analysis
+GET /api/v1/resumes/{resume_id}
+
+# List user's resumes
+GET /api/v1/resumes
+```
+
+### Job Matching
+
+```bash
+# Create a job description
+POST /api/v1/jobs
+{
+  "title": "Senior Python Developer",
+  "description": "We are looking for...",
+  "required_skills": ["Python", "FastAPI", "PostgreSQL"]
+}
+
+# Match resumes to a job
+POST /api/v1/matches/job/{job_id}
+{
+  "resume_ids": [1, 2, 3]
+}
+
+# Get match results
+GET /api/v1/matches/{match_id}
+```
+
+**Full API documentation available at**: http://localhost:8000/api/v1/docs
+
+---
+
+## 💻 Development
+
+### Project Structure
+
+```
+AI-Powered-Resume-Analyzer/
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/          # API endpoints
+│   │   ├── core/            # Core utilities
+│   │   ├── db/              # Database config
+│   │   ├── models/          # SQLAlchemy models
+│   │   ├── schemas/         # Pydantic schemas
+│   │   ├── services/        # Business logic
+│   │   ├── tasks/           # Celery tasks
+│   │   ├── config.py        # Configuration
+│   │   └── main.py          # FastAPI app
+│   ├── tests/               # Tests
+│   ├── alembic/             # Database migrations
+│   ├── pyproject.toml       # Dependencies
+│   └── Dockerfile
+├── frontend/                # Next.js frontend (coming soon)
+├── docker-compose.yml       # Docker orchestration
+└── README.md
+```
+
+### Running Tests
+
+```bash
+cd backend
+
+# Run all tests with coverage
+poetry run pytest --cov=app --cov-report=html
+
+# Run specific test file
+poetry run pytest tests/test_resumes.py
+
+# Run with verbose output
+poetry run pytest -vv
+```
+
+### Code Quality
+
+```bash
+# Format code
+poetry run black app tests
+
+# Lint code
+poetry run ruff check app tests
+
+# Type checking
+poetry run mypy app
+
+# Run all quality checks
+poetry run pre-commit run --all-files
+```
+
+### Database Migrations
+
+```bash
+# Create a new migration
+poetry run alembic revision --autogenerate -m "Add new field"
+
+# Apply migrations
+poetry run alembic upgrade head
+
+# Rollback one migration
+poetry run alembic downgrade -1
+
+# Check current version
+poetry run alembic current
+```
+
+---
+
+## 🚢 Deployment
+
+### Production Checklist
+
+- [ ] Set strong `SECRET_KEY` in environment
+- [ ] Configure production database (PostgreSQL)
+- [ ] Set up Redis (managed service or cluster)
+- [ ] Configure CORS origins to your frontend domain
+- [ ] Add OpenAI API key
+- [ ] Enable HTTPS
+- [ ] Set up monitoring (Sentry)
+- [ ] Configure backups
+- [ ] Set up CI/CD pipeline
+
+### Environment Variables (Production)
+
+```bash
+# Application
+ENVIRONMENT=production
+DEBUG=false
+
+# Security
+SECRET_KEY=<generate-strong-random-key>
+
+# Database
+DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname
+
+# Redis
+REDIS_URL=redis://:<password>@host:6379/0
+
+# AI Services
+OPENAI_API_KEY=sk-...
+
+# Monitoring
+SENTRY_DSN=https://...
+```
+
+### Docker Production Deployment
+
+```bash
+# Build production images
+docker-compose -f docker-compose.prod.yml build
+
+# Start services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f backend
+
+# Stop services
+docker-compose -f docker-compose.prod.yml down
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests and linting
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Development Guidelines
+
+- Write tests for new features
+- Follow PEP 8 style guide
+- Add type hints to all functions
+- Update documentation as needed
+- Keep commits atomic and well-described
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- FastAPI for the amazing async framework
+- OpenAI for GPT-4 capabilities
+- LangChain for LLM orchestration
+- The open-source community
+
+---
+
+## 📧 Contact
+
+For questions or support, please open an issue on GitHub.
+
+**Built with ❤️ using modern technologies**
