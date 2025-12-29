@@ -1,3 +1,8 @@
+# Deployed Application
+
+**Frontend:** [Vercel Deployment](https://ai-powered-resume-analyzer-9af3-jf8lh7shq.vercel.app/)
+
+**Backend:** [Render Deployment](https://ai-powered-resume-analyzer-o0cy.onrender.com/)
 # Full Stack Setup: React Frontend & FastAPI Backend
 
 ## Backend (Python/FastAPI)
