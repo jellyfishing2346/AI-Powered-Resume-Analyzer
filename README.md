@@ -1,3 +1,41 @@
+# Full Stack Setup: React Frontend & FastAPI Backend
+
+## Backend (Python/FastAPI)
+
+1. Open the `backend/` folder.
+2. (Optional) Create a virtual environment:
+    ```sh
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+3. Install dependencies:
+    ```sh
+    pip install -r requirements.txt
+    ```
+4. Start the FastAPI server:
+    ```sh
+    uvicorn main:app --reload
+    ```
+    The backend will be available at http://127.0.0.1:8000
+
+## Frontend (React)
+
+1. Make sure you are in the project root directory.
+2. Install dependencies:
+    ```sh
+    npm install
+    ```
+3. (If you add a start script) Start the frontend:
+    ```sh
+    npm start
+    ```
+    (Or use your preferred React build tool.)
+
+## Connecting Frontend & Backend
+
+The React frontend can make HTTP requests to the FastAPI backend at `http://localhost:8000`.
+
+---
 # Aura AI: Resume Intelligence 🚀
 
 Aura AI is a high-performance, AI-driven resume analyzer and candidate ranking system. It leverages advanced NLP via the **Gemini 3 Flash** model to provide deep insights into candidate qualifications, skill gaps, and job fit.
