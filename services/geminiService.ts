@@ -10,7 +10,7 @@ export const analyzeResume = async (
   mimeType: string,
   jobDesc: JobDescription
 ): Promise<CandidateAnalysis> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY as string });
 
   const prompt = `
     Analyze the attached resume against the following Job Description:
