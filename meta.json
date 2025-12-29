@@ -1,0 +1,6 @@
+
+{
+  "name": "Aura AI: Resume Intelligence",
+  "description": "A high-performance AI-driven resume analyzer that ranks candidates using Gemini NLP, providing deep insights into skill gaps and qualifications.",
+  "requestFramePermissions": []
+}
